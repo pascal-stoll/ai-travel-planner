@@ -1,8 +1,15 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTravel } from '../context/TravelContext.jsx';
+import { TripHistoryCard } from '../components/TripHistoryCard.jsx';
 
 function MyTripsPage() {
-  const { history } = useTravel();
+  const { history, loadTrip } = useTravel();
+  const navigate = useNavigate();
+
+  const openTrip = (tripId) => {
+    loadTrip(tripId);
+    navigate('/results');
+  };
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
@@ -11,9 +18,9 @@ function MyTripsPage() {
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-orange-500">My Trips</p>
           <h1 className="text-3xl font-semibold text-slate-950">Saved itineraries</h1>
         </div>
-        <Link to="/" className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-300">
+        <button type="button" onClick={() => navigate('/')} className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-300">
           Back to landing
-        </Link>
+        </button>
       </header>
 
       {history.length === 0 ? (
@@ -34,6 +41,15 @@ function MyTripsPage() {
                   <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-700">{trip.duration}</span>
                   <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-700">{trip.radius}</span>
                 </div>
+              </div>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => openTrip(trip.id)}
+                  className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                >
+                  Open plan
+                </button>
               </div>
             </article>
           ))}

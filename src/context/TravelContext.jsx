@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { defaultWizardState } from '../utils/constants.js';
 
 const TravelContext = createContext(null);
 
@@ -23,17 +24,7 @@ function writeJson(key, value) {
 }
 
 export function TravelProvider({ children }) {
-  const [wizardState, setWizardState] = useState({
-    mood: [],
-    duration: '',
-    radius: '',
-    budget: 'Mid-Range',
-    adults: 2,
-    children: 0,
-    transport: ['Car'],
-    location: { label: 'Your location', coords: null },
-  });
-
+  const [wizardState, setWizardState] = useState(defaultWizardState);
   const [activeItinerary, setActiveItinerary] = useState(() => readJson(STORAGE_KEYS.ACTIVE, null));
   const [history, setHistory] = useState(() => readJson(STORAGE_KEYS.HISTORY, []));
 
@@ -45,6 +36,23 @@ export function TravelProvider({ children }) {
     writeJson(STORAGE_KEYS.HISTORY, history);
   }, [history]);
 
+  const saveTrip = (trip) => {
+    setActiveItinerary(trip);
+    setHistory((current) => {
+      if (current.some((item) => item.id === trip.id)) return current;
+      return [trip, ...current].slice(0, 12);
+    });
+  };
+
+  const loadTrip = (tripId) => {
+    const trip = history.find((item) => item.id === tripId);
+    if (trip) {
+      setActiveItinerary(trip);
+    }
+  };
+
+  const resetWizard = () => setWizardState(defaultWizardState);
+
   const value = useMemo(
     () => ({
       wizardState,
@@ -53,6 +61,9 @@ export function TravelProvider({ children }) {
       setActiveItinerary,
       history,
       setHistory,
+      saveTrip,
+      loadTrip,
+      resetWizard,
     }),
     [wizardState, activeItinerary, history],
   );
