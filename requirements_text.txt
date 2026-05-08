@@ -1,0 +1,3113 @@
+--- PAGE 1 ---
+TravelMind 
+AI-Powered Travel Planner 
+Group Assignment 4 — Requirement Analysis 
+1.  Requirement Report 
+1.1  Introduction 
+In the contemporary digital landscape, access to travel information has reached an unprecedented 
+scale. Hundreds of booking platforms, travel blogs, review aggregators, social media channels, and 
+destination guides compete simultaneously for the traveller's attention. Paradoxically, this abundance 
+of information — rather than simplifying the planning process — has generated what behavioural 
+economists describe as the "paradox of choice": the more options are available, the greater the 
+cognitive burden experienced by the decision-maker, and the lower the resulting satisfaction. 
+ 
+Planning a trip has effectively become a second, unpaid job . A traveller seeking a long weekend 
+away must typically: cross -reference flight aggregators with hotel booking platforms, reconcile 
+contradictory TripAdvisor reviews with Instagram posts, manually verify opening hours and seasonal 
+closures, estimate travel times between attractions, and finally synthesise all of this into a coherent, 
+logistically viable schedule — all before the journey has even begun. Research by the Google Travel 
+Insights division consistently shows that travellers visit an average of 38 different websites in the 45 
+days preceding a booking decision. This fragmentation of information sources produces decision 
+fatigue: a well-documented psychological phenomenon whereby the quality of decisions deteriorates 
+sharply after prolonged exposure to complex choices. 
+ 
+The consequences of this inefficiency extend beyond mere inconvenience. Decision fatigue in travel 
+planning manifests as: the tendency to default to familiar, "safe" destinations rather than exploring 
+alternatives genuinely aligned with personal preference s; the abandonment of planning efforts 
+entirely, resulting in suboptimal last -minute bookings; and post -trip dissatisfaction stemming from 
+itineraries that prioritised logistical convenience over experiential quality. 
+ 
+Despite significant investment from the travel technology sector, existing digital solutions have failed 
+to resolve this structural problem. Current tools — whether booking engines, itinerary builders, or 
+recommendation platforms — operate on a paradigm of  rigid, filter-based data queries that require 
+the user to already know, with precision, what they want. They demand structured inputs (dates, 
+destination, budget range, star rating) at a stage when the user's mental state is inherently unstructured: 
+a mood, a feeling, a vague aspiration. The fundamental mismatch between the fluidity of human 
+desire and the rigidity of current interfaces constitutes the core problem that TravelMind is designed 
+to address. 
+
+--- PAGE 2 ---
+ 
+ "The fundamental mismatch between the fluidity of human desire and the rigidity of current 
+travel interfaces is not a minor UX issue — it is a structural failure that costs travellers 
+hours of effort and results in itineraries misaligned with their actual preferences." 
+ 
+1.1.1  The Problem in Numbers 
+The scale of the travel planning problem can be quantified across several dimensions: 
+ 
+Metric Data Point Implication 
+Avg. planning time (leisure 
+trip) 
+4–6 hours Equivalent to a full working 
+day lost per trip 
+Websites consulted before 
+booking 
+38 (Google, 2023) Extreme information 
+fragmentation 
+Users who feel overwhelmed 
+by choices 
+72% (Booking.com) Majority suffer from choice 
+overload 
+Trips abandoned mid-
+planning 
+31% initiated High dropout due to 
+cognitive friction 
+Post-trip satisfaction 
+(unplanned trips) 
+Lower by 23% Spontaneous ≠ better 
+without AI support 
+ 
+1.2  Background 
+1.2.1  The Failure of Rigid Filter-Based Systems 
+Contemporary travel platforms are architected around a structured-query model: the user is required 
+to specify discrete, machine -readable parameters — origin, destination, departure date, return date, 
+number of passengers, budget ceiling — before any resul ts are surfaced. This model was designed 
+for an era when computational resources were scarce and search indexes were shallow. It assumes 
+that the user possesses, at the outset of their planning process, a level of decisional clarity that, in 
+practice, very few travellers have. 
+ 
+Human travel motivations are inherently psychographic in nature. A traveller does not begin their 
+planning journey thinking "I want to go to Lisbon on the 14th of June for three nights with a budget 
+of €600". They begin with an emotional state: "I need to disconnect from work", "I want to eat 
+incredible food in an authentic setting", "I am looking for something adventurous but not physically 
+demanding". These psychographic signals — mood, aspiration, cognitive need — are entirely 
+invisible to filter-based systems, which cannot process them. 
+
+--- PAGE 3 ---
+ 
+The consequences are systematic: users are forced to translate their fluid, emotional intent into the 
+rigid syntax of a search form, losing critical nuance in the process. The resulting recommendations 
+are optimised for logistical parameters (price, availa bility, distance) rather than for experiential fit. 
+The user receives technically correct results that are experientially misaligned — a failure mode that 
+current platforms have no mechanism to detect or correct. 
+ 
+ Traditional Filter-Based Systems  TravelMind AI Approach 
+• Requires pre-defined destination 
+• Filter-only: date, stars, price 
+• No semantic understanding of mood 
+• Static results, no personalisation 
+• User must know what they want 
+• No cross-domain data synthesis 
+• Zero context memory across sessions 
+• Destination emerges from preferences 
+• Understands mood, vibe, pace 
+• NLP interprets fuzzy, open-ended input 
+• Dynamic itinerary, adapts to profile 
+• AI guides the user toward discovery 
+• Synthesises geo, culture, logistics, reviews 
+• Builds preference model over interactions 
+ 
+1.2.2  Natural Language Processing as the Enabling Technology 
+The technological precondition for TravelMind's approach is the maturation of large -scale Natural 
+Language Processing (NLP) models, specifically Large Language Models (LLMs) trained on broad 
+corpora of human-generated text. These models have demonstrated a remarkable capacity to perform 
+semantic interpretation: the ability to extract structured meaning — intent, sentiment, constraint, 
+preference — from unstructured, colloquial, and even grammatically imperfect natural language 
+input. 
+ 
+Consider the following user prompt: "Voglio qualcosa di rilassante, lontano dalla folla, ma con 
+buon cibo e non troppo caro" . A filter -based system receives this as null input — no parseable 
+parameters. An NLP -powered system, by contrast, extracts a rich semantic payload: a low-
+stimulation environment (relaxing), a preference for non-touristic areas (away from crowds), a 
+high weighting on gastronomic quality  (good food), and a budget sensitivity signal  (not too 
+expensive). From these four semantic anchors, TravelMind can generate a destination shortlist, filter 
+it against geospatial and logistical constraints, and produce a fully structured itinerary — all within 
+seconds. 
+ 
+The power of this approach lies in its capacity for contextual inference: the ability to fill in unstated 
+but contextually implied constraints. A user travelling with young children does not need to 
+enumerate every child -safety requirement; the system infe rs them from the family context. A user 
+requesting an "adventurous" itinerary in winter does not need to exclude ski resorts; the system infers 
+geographic and seasonal compatibility automatically. This inference layer radically reduces the 
+cognitive burden on the user. 
+ 
+
+--- PAGE 4 ---
+🔬  Technical Note: Prompt Engineering as Core IP 
+The quality of TravelMind's output is directly proportional to the quality of its prompt 
+engineering layer. The system translates structured user inputs (collected via the wizard UI) 
+into a semantically rich, constraint -encoded prompt that is submitted to the LLM API. This 
+prompt engineering module — specifying output schema (JSON), constraint hierarchy, tone, 
+and domain vocabulary — constitutes the primary technical differentiator of the TravelMind 
+system and is therefore the most critical component of the AI Wrapper layer. 
+ 
+1.2.3  AI as Expert Curator: From Big Data to Tailored Recommendations 
+Beyond semantic interpretation, the second key value driver of an AI -powered travel planner is its 
+capacity for large -scale data aggregation and synthesis. A human travel expert — a high -end 
+concierge, a destination specialist — derives their value from years of accumulated knowledge about 
+places, experiences, logistics, and seasonal nuances. They can recall that a particular coastal town is 
+best visited in shoulder season, that a specific restaurant requires booking six weeks in advance, or 
+that a cultural  museum's permanent collection is undergoing renovation. This accumulated, cross -
+referenced expertise is what transforms a list of places into a genuinely useful itinerary. 
+ 
+An LLM trained on a sufficiently broad corpus of travel literature, reviews, geographic data, and 
+cultural information can approximate this curatorial expertise at scale, instantaneously, and without 
+the economic barrier of a human specialist. TravelMind l everages this capability to act as a 
+democratised expert curator: providing every user, regardless of budget or prior travel knowledge, 
+with the quality of recommendation previously available only to luxury travellers with access to 
+specialist concierge services. 
+ 
+Critically, the AI's curatorial function extends beyond simple recommendation to include logistical 
+coherence: the generated itinerary respects opening hours, travel times between stops, meal timing, 
+cognitive pacing (avoiding back -to-back high-stimulation activities), and budget distribution across 
+the trip duration. This multi -constraint optimisation — trivial for an AI system, enormously time -
+consuming for a human planner — is the central efficiency gain that TravelMind delivers. 
+ 
+1.3  Purpose 
+The primary goal of the TravelMind project, developed as part of the Software Engineering 
+programme, is to design, implement, and validate a Minimum Viable Product (MVP) of an AI -
+powered travel planning web application. The MVP is scoped to demonstrate the  core value 
+proposition of the system — the translation of unstructured user preferences into a structured, 
+actionable travel itinerary — while maintaining implementational feasibility within the project 
+timeline. 
+ 
+
+--- PAGE 5 ---
+The following sub-sections define the specific objectives of the TravelMind MVP, structured around 
+five functional pillars. Each objective is accompanied by its rationale and a mapping to the technical 
+components responsible for its realisation. 
+ 
+1.3.1  Core MVP Objectives 
+ID Objective Description 
+OBJ-
+01 
+Conversational Input 
+Interface 
+Provide the user with a structured wizard-based 
+interface that collects preferences expressed in natural, 
+low-friction terms (mood, vibe, pace) rather than 
+requiring discrete machine-readable parameters. The 
+wizard reduces input complexity while preserving the 
+semantic richness needed by the AI layer. 
+OBJ-
+02 
+AI-Driven Destination 
+Suggestion 
+Implement an AI wrapper module that submits 
+structured prompts to a Large Language Model API 
+(DeepSeek) and retrieves 2–3 destination 
+recommendations with rationale, ranked by semantic fit 
+to the user's stated preferences and geospatial 
+constraints. 
+OBJ-
+03 
+Dynamic Itinerary 
+Generation 
+Upon user selection of a destination, generate a full 
+day-by-day itinerary with named stops, suggested visit 
+times, estimated durations, travel time between stops, 
+and per-stop AI-generated descriptions. Output is 
+returned as structured JSON for clean frontend 
+rendering. 
+OBJ-
+04 
+Interactive Visualisation Render the generated itinerary both as a chronological 
+list view (day-by-day cards) and as an interactive map 
+(Leaflet.js) with numbered stop markers and route 
+polylines. Provide per-stop regeneration capability 
+without full itinerary refresh. 
+OBJ-
+05 
+Persistence and 
+Shareability 
+Enable itinerary saving to localStorage for session 
+persistence, PDF export via jsPDF for offline use, and 
+shareable link generation for social distribution. 
+Maintain a browsable trip history accessible from the 
+application's navigation. 
+ 
+1.3.2  Reduction of Time-to-Plan as the Primary KPI 
+The central, measurable outcome of TravelMind is the reduction of Time-to-Plan: the elapsed time 
+from the user's initial intent to plan a trip to the moment they possess a complete, actionable itinerary. 
+Based on the baseline data presented in Section 3.1.1 (4 –6 hours of manual planning for a leisure 
+
+--- PAGE 6 ---
+trip), TravelMind targets a Time-to-Plan of under 5 minutes for the core wizard-to-itinerary flow, 
+representing a reduction of approximately 98% relative to the current manual baseline. 
+ 
+This target is achievable through three compounding efficiency mechanisms: (1) the wizard interface 
+eliminates the need to visit multiple external platforms; (2) the AI layer performs destination research 
+and logistics planning in parallel, not sequentially; and (3) the structured JSON output schema ensures 
+zero latency between AI response and frontend rendering, with no manual reformatting required by 
+the user. 
+ 
+ MVP Success Criteria Summary 
+The TravelMind MVP will be considered successful if it demonstrates: (1) end -to-end flow 
+from wizard input to rendered itinerary in under 5 minutes; (2) semantic accuracy — AI-
+generated destinations are rated as 'relevant' or 'highly relevant' by at least 80% of test users 
+given their stated input; (3) zero unhandled API errors in the demo scenario — all failure 
+modes produce graceful, user-actionable error states; and (4) full mobile responsiveness across 
+standard viewport widths (360 px – 1440 px). 
+ 
+1.3.3  Academic Scope and Learning Objectives 
+In addition to its functional goals, the TravelMind project is designed to provide the development 
+team with structured, hands-on experience across the core competencies of the Software Engineering 
+curriculum: 
+ 
+• Requirements Engineering: Functional and non-functional requirements elicitation, user story 
+mapping, and use case modelling. 
+• AI Integration and Prompt Engineering: Design of structured LLM prompts, handling of stochastic API 
+responses, and implementation of JSON schema enforcement for reliable output parsing.  
+• System Architecture: Separation of concerns across frontend (React/Vanilla JS), AI wrapper 
+(Node.js/Express), and data persistence (localStorage) layers. 
+• Project Management: Work Breakdown Structure (WBS), Critical Path Method (CPM), and sprint -based 
+iterative delivery. 
+• Testing and Quality Assurance: API error handling validation, responsive design testing, and user 
+acceptance testing (UAT) against defined success criteria.  
+ 
+ TravelMind does not aim to replace the joy of travel discovery — it aims to eliminate the 
+friction that prevents that discovery from happening. By positioning AI not as a replacement 
+for human judgment but as an intelligent pre -processing layer that organi ses the world's 
+travel information around the individual user's actual desires, TravelMind represents a 
+structurally new paradigm in travel planning software. 
+
+--- PAGE 7 ---
+2.  Requirement Gathering 
+This section documents the complete set of requirements for the TravelMind MVP, organised 
+across three complementary artefacts: User Stories (Section 2.1), Functional Requirements (Section 
+2.2), and Non-Functional Requirements (Section 2.3). Each artefact provides a different lens on the 
+same underlying system, allowing the development team to reason about user value, system 
+behaviour, and quality constraints independently and in combination. This edition resolves five 
+consistency issues identified in the prior draft: RF cross-reference alignment (US32–37 replacing 
+legacy US-USP codes), mood taxonomy unification across RF-WIZ01 and RF-WIZ09, budget-tier 
+fast-path scoping, NFR05/NFR22 target disambiguation, and Surprise Me / Anywhere naming 
+distinction. 
+2.1  User Story Table with Duration and Priority Estimation 
+User Stories are expressed from the end-user’s perspective following the canonical format: “As a 
+[user], I want to [action], so that [outcome]”. Each story is linked to one or more Functional 
+Requirements (RF codes), assigned a MoSCoW priority, and annotated with an estimated 
+implementation effort in developer-days. Stories are grouped by functional domain for readability. 
+Stories US32–37 define the core three-button fast-path (Mood → Duration → Radius) that 
+constitutes TravelMind’s primary USP. 
+ 
+ID User Story Linked RF(s) Priority Est. 
+Days 
+US01 As a user, I want to select my preferred travel style (Relax, 
+Adventure, Culture, Food, Nature, Nightlife) from a visual card-
+based interface in the extended wizard flow, so that the AI 
+understands my experiential preference with full granularity. 
+RF-WIZ01 
+High 
+2 
+US02 As a user, I want to specify my departure city or allow the website to 
+detect my current location via the browser Geolocation API, so that 
+distance-based filtering is accurate without manual research. 
+RF-WIZ02 
+High 
+2 
+US03 As a user, I want to set a maximum travel distance from my 
+departure point using a slider (0–500 km), so that suggestions remain 
+within a reachable range. 
+RF-WIZ02 
+High 
+1 
+US04 As a user, I want to indicate the duration of my trip (a few hours / 1 
+day / 2–3 days / 1 week+) using a segmented control, so that the 
+generated itinerary is appropriately scoped. 
+RF-WIZ03 
+High 
+1 
+US05 As a user, I want to select a budget tier (Economy / Budget / Mid-
+Range / Premium / Luxury) from a visual tile selector, so that 
+recommendations are financially appropriate without requiring me to 
+enter an exact monetary figure. 
+RF-WIZ04 
+High 
+2 
+US06 As a user, I want to specify the number of adults and children in my 
+travel group, so that the AI can factor group size and child-
+friendliness into its recommendations. 
+RF-WIZ05 
+High 
+1 
+US07 As a user, I want to select one or more preferred transport modes (On 
+Foot / Car / Public Transport / Train / Flight) via a multi-select chip 
+interface, so that the routing logic respects my mobility constraints. 
+RF-WIZ06 
+High 
+2 
+
+--- PAGE 8 ---
+US08 As a user, I want to review a summary of all my wizard inputs on a 
+confirmation screen before triggering AI generation, so that I can 
+correct any mistakes without restarting from scratch. 
+RF-WIZ07 
+High 
+1 
+US09 As a user, I want to activate a 'Surprise Me' mode from the landing 
+page that bypasses the three-button flow entirely and lets the AI 
+randomise all parameters autonomously, so that I can get an itinerary 
+with zero planning effort. (Distinct from the 'Anywhere' radius preset 
+in US34, which only removes the distance constraint.) 
+RF-WIZ08 
+Medium 
+2 
+US10 As a user completing the extended wizard flow, I want the system to 
+submit my preferences to an AI API and receive 2–3 destination 
+suggestions with a short rationale and estimated distance for each, so 
+that I can make an informed choice between alternatives before 
+committing to a full itinerary. This step is not part of the three-button 
+fast-path, where the AI selects the best-matching destination 
+autonomously. 
+RF-AI01, RF-
+AI02 
+High 
+3 
+US11 As a user completing the extended wizard flow, I want to select one 
+destination from the AI-generated shortlist so that the system 
+proceeds to generate a full itinerary for my chosen location. In the 
+three-button fast-path, this selection step is skipped — the AI 
+resolves the destination internally and proceeds directly to itinerary 
+generation. 
+RF-AI03 
+High 
+1 
+US12 As a user, I want the AI to generate a complete day-by-day itinerary 
+with named stops, suggested visit times, estimated durations, and a 
+short description for each stop, so that I have a ready-to-use plan 
+without any additional research. 
+RF-AI04, RF-
+AI05 High 
+4 
+US13 As a user, I want the itinerary to include estimated travel times 
+between consecutive stops (adapted to my selected transport mode), 
+so that the daily schedule is logistically realistic. 
+RF-AI06 
+High 
+2 
+US14 As a user, I want to be able to regenerate a single stop in the itinerary 
+without refreshing the entire plan, so that I can fine-tune specific 
+parts of the trip while preserving the rest. 
+RF-AI07 
+High 
+3 
+US15 As a user, I want the AI to return its output in a structured JSON 
+format that maps directly to the frontend rendering schema, so that 
+there is no manual data transformation step and latency is minimised. 
+RF-AI08 
+High 
+3 
+US16 As a user, I want to see a contextual loading screen with rotating 
+status messages while the AI is processing my request, so that I am 
+informed of progress and do not perceive the wait as a system failure. 
+RF-LD01 
+High 
+1 
+US17 As a user, I want the system to handle AI API timeouts and failures 
+gracefully, showing a clear error message and offering a retry or edit 
+option, so that a temporary API outage does not result in a dead end. 
+RF-ERR01 
+High 
+2 
+US18 As a user, I want to view the generated itinerary as a chronological 
+list of day cards, each expandable to show individual stops with time, 
+name, description, and duration, so that I can read through the full 
+plan in a structured format. 
+RF-VIS01 
+High 
+3 
+US19 As a user, I want to view the itinerary stops on an interactive 
+Leaflet.js map with numbered markers and a route polyline 
+connecting them in sequence, so that I have a spatial understanding 
+of the trip layout. 
+RF-VIS02, RF-
+MAP01 High 
+4 
+US20 As a user, I want to click on a map marker to open a detail panel with 
+the stop's name, AI-generated description, and suggested visit time, 
+so that I can access stop details directly from the map without 
+switching views. 
+RF-MAP02 
+Medium 
+2 
+
+--- PAGE 9 ---
+US21 As a user, I want to switch between Map View and List View using a 
+tab bar on the Results page, so that I can choose the visualisation 
+format that best suits my planning style. 
+RF-VIS03 
+Medium 
+1 
+US22 As a user, I want the Results page to display a destination header 
+with a full-bleed photo, the destination name, and a mood tag, so that 
+the visual context of the trip is immediately communicated. 
+RF-VIS04 
+Medium 
+1 
+US23 As a user, I want my generated itinerary to be automatically saved to 
+browser localStorage upon generation, so that I can return to it later 
+without needing to regenerate. 
+RF-STO01 
+High 
+2 
+US24 As a user, I want to access a 'My Trips' page that lists all previously 
+generated itineraries with destination thumbnail, name, trip type, and 
+generation date, so that I can revisit and compare past plans. 
+RF-STO02 
+High 
+2 
+US25 As a user, I want to delete a saved itinerary from my trip history by 
+clicking a delete button with a confirmation prompt, so that I can 
+manage my storage without accidentally losing data. 
+RF-STO03 
+Medium 
+1 
+US26 As a user, I want to export the current itinerary as a PDF document 
+that includes the destination name, daily schedule, stop descriptions, 
+and a static map image, so that I can access my plan offline. 
+RF-EXP01 
+Medium 
+3 
+US27 As a user, I want to generate a shareable link for my itinerary and 
+copy it to the clipboard with a single click, so that I can share my 
+travel plan with companions or on social media. 
+RF-EXP02 
+Low 
+2 
+US28 As a user, I want to search and filter my saved trips by destination 
+name, so that I can quickly locate a specific itinerary in a long history 
+list. 
+RF-STO04 
+Low 
+1 
+US29 As a user on a mobile device, I want the entire website to be fully 
+usable on a 360 px viewport with no horizontal scrolling, so that I 
+can plan my trip from my smartphone. 
+RF-RESP01 
+High 
+3 
+US30 As a user, I want all interactive elements (buttons, chips, sliders) to 
+have a minimum click target of 48×48 px, so that the interface is 
+comfortably operable on both desktop and touch screens. 
+RF-ACC01 
+Medium 
+1 
+US31 As a user with visual impairments, I want all text to meet WCAG 2.1 
+AA contrast requirements (minimum 4.5:1 ratio), so that the interface 
+is readable in all lighting conditions. 
+RF-ACC02 
+Medium 
+1 
+US32 As a user, I want to click a 'Mood' button on the landing page and 
+choose from 6 experiential categories (Relax / Adventure / Culture / 
+Food / Nature / Nightlife) rendered as large icon tiles in a modal 
+overlay, so that the AI understands my experiential intent without 
+requiring me to type anything. 
+RF-WIZ09 
+CRITICAL 
+3 
+US33 As a user, I want to click a 'Duration' button immediately after 
+selecting my Mood, choosing from 4 time options (A few hours / 1 
+day / 2–3 days / 1 week+) rendered as segmented tiles with icon and 
+descriptor, so that the AI scopes the itinerary depth correctly with 
+zero manual input. 
+RF-WIZ10 
+CRITICAL 
+1 
+US34 As a user, I want to click a 'Radius' button as the third and final step, 
+selecting my maximum travel distance via 5 preset options (< 50 km 
+/ 50–150 km / 150–300 km / 300–500 km / Anywhere), so that all 
+AI-suggested destinations are guaranteed to be within reach. The 
+'Anywhere' preset removes the distance constraint only — it does not 
+randomise other parameters (see US09 for full Surprise Me 
+behaviour). 
+RF-WIZ11 
+CRITICAL 
+2 
+
+--- PAGE 10 ---
+US35 As a user, I want the three-button selection to immediately trigger AI 
+generation — with no confirmation screen and no additional wizard 
+steps required — so that I receive my first itinerary in under 60 
+seconds from opening the website. 
+RF-WIZ12 
+CRITICAL 
+1 
+US36 As a user, I want to be able to long-press any of the three buttons to 
+access extended options (e.g., multi-mood weighting, custom km 
+input, exact date entry), so that power users can refine their 
+preferences without disrupting the default fast-path flow. 
+RF-WIZ13, RF-
+WIZ14 High 
+2 
+US37 As a user, I want to see the three selected values summarised as 
+coloured chips on the loading screen and as a persistent 'trip brief' 
+row on the landing screen, so that I have a visual confirmation of my 
+selections while the AI processes my request and can quickly re-
+trigger generation. 
+RF-WIZ12, RF-
+WIZ14, RF-
+LD01 High 
+1 
+ 
+  
+
+--- PAGE 11 ---
+2.2  Functional Requirements Table with Priority Estimation 
+Functional Requirements define the specific behaviours the TravelMind system must exhibit. Each 
+requirement is assigned a unique identifier (RF-XXNN), a descriptive name, a detailed behavioural 
+description, a MoSCoW priority, and a cross-reference to the User Stories it satisfies.  
+ 
+Module: Wizard Input (RF-WIZ) 
+ID Name Description Priority Linked US 
+RF-
+WIZ01 
+Trip Type 
+Selection 
+(Extended 
+Wizard) 
+The extended wizard must present six travel style options 
+— Relax, Adventure, Culture, Food, Nature, Nightlife — 
+as tappable icon cards. The user must select at least one 
+option before proceeding. Multi-selection must be 
+supported. This step is accessible via long-press Extended 
+Options or the full wizard mode. 
+High 
+US01 
+RF-
+WIZ02 
+Location & 
+Distance Input 
+The system must provide a text input field for manual city 
+entry with autocomplete (OpenStreetMap Nominatim or 
+Google Places API), a geolocation toggle (browser 
+Geolocation API), and a range slider for maximum distance 
+(0–500 km, step 25 km). 
+High 
+US02, US03 
+RF-
+WIZ03 
+Trip Duration 
+Selection 
+The system must display a segmented control with four 
+duration options: 'A few hours', '1 Day', '2–3 Days', '1 
+Week+'. Exactly one option must be selected at a time. 
+High 
+US04 
+RF-
+WIZ04 
+Budget Tier 
+Selection 
+The system must display five budget tiers as icon tiles: 
+Economy, Budget, Mid-Range, Premium, Luxury. Exactly 
+one tier must be selected. Each tile must include an icon, 
+label, and one-line descriptor. 
+High 
+US05 
+RF-
+WIZ05 
+Traveller Group 
+Configuration 
+The system must provide independent stepper controls for 
+adults (min 1, max 20) and children (min 0, max 10). The 
+children stepper must be revealed conditionally upon 
+activation of a 'Travelling with children' toggle. 
+High 
+US06 
+RF-
+WIZ06 
+Transport Mode 
+Selection 
+The system must display five transport mode chips (On Foot, 
+Car, Public Transport, Train, Flight) that support multi-
+selection. At least one mode must be selected before 
+proceeding. 
+High 
+US07 
+RF-
+WIZ07 
+Wizard Review & 
+Confirm Screen 
+The system must display a summary card listing all 
+parameters entered in Steps 1–4 of the extended wizard. Each 
+parameter row must include an inline edit icon that navigates 
+back to the relevant wizard step without resetting other steps. 
+High 
+US08 
+RF-
+WIZ08 
+Surprise Me 
+Mode 
+The system must provide a 'Surprise Me' entry point on 
+the landing page. When activated, ALL wizard parameters 
+— mood, duration, radius, budget, group size, and 
+transport mode — must be randomised within valid ranges 
+and AI generation must be triggered immediately without 
+any wizard or selector flow. 
+Medium 
+US09 
+RF-
+WIZ09 
+Mood Selector 
+Button (Fast Path) 
+The landing screen MUST display a 'Mood' button as the 
+primary CTA element, larger than all other interactive 
+elements. On tap, a bottom sheet slides up presenting 6 mood 
+tiles: Relax (                    ), Adventure (                            ), Culture (   ), Food (    ), 
+Nature (      ), Nightlife (  ). Each tile must include a large 
+icon (48 dp), a label (14 pt SemiBold), and a one-line 
+CRITICAL 
+US32 
+
+--- PAGE 12 ---
+descriptor (12 pt, Slate Grey). Multi-selection MUST be 
+supported. Minimum 1 selection required. Sheet dismisses on 
+selection with a confirmed state animation (150 ms). 
+RF-
+WIZ10 
+Duration Selector 
+Button (Fast Path) 
+Immediately after Mood selection is confirmed, a 'Duration' 
+button MUST become the visually dominant interactive 
+element. On tap, a bottom sheet presents 4 duration tiles: A 
+few hours (       ), 1 day (  ), 2–3 days (               ), 1 week+ (    ). 
+Each tile displays the duration label, an icon, and an AI hint 
+(e.g., '5–8 stops · day trip'). Exactly one selection required. 
+On selection, the sheet dismisses and the Duration button 
+updates to show the selected value. 
+CRITICAL 
+US33 
+RF-
+WIZ11 
+Radius Selector 
+Button (Fast Path) 
+After Duration selection, a 'Radius' button MUST become 
+dominant. On tap, a bottom sheet presents 5 distance presets: 
+< 50 km (                   Nearby), 50–150 km (         Day trip), 150–300 
+km (        Regional), 300–500 km (     Extended), Anywhere 
+(   No distance constraint). GPS location detection MUST 
+be triggered automatically when this sheet opens (RF-ERR02 
+fallback applies). The detected city name MUST be displayed 
+above the presets as: '    Starting from: [City]'. Exactly one 
+selection required. 'Anywhere' disables the distance filter in 
+the AI prompt but does NOT randomise other parameters (see 
+RF-WIZ08 for full Surprise Me behaviour). 
+CRITICAL 
+US34 
+RF-
+WIZ12 
+Auto-Trigger AI 
+Generation 
+Upon completion of all three selections (Mood + Duration + 
+Radius), the system MUST automatically construct the AI 
+prompt and navigate to the Loading Screen without requiring 
+any additional confirmation tap. The three selected values 
+MUST be summarised as coloured chips on the Loading 
+Screen (Mood chip: Ocean Deep #1A6B8A; Duration chip: 
+Forest Trail #2E9E6B; Radius chip: Sunset Gold #F47B20). 
+A 300 ms delay MUST be observed between the last selection 
+and navigation to allow the confirm animation to complete. 
+Exception: if the user long-presses the 'Generate' area, a 
+confirmation summary card MUST be shown before 
+triggering. 
+CRITICAL 
+US35, US37 
+RF-
+WIZ13 
+Long-Press 
+Extended Options 
+Each of the three selector buttons MUST support a long-press 
+gesture (500 ms hold) that opens an extended options panel as 
+a secondary tab within the same bottom sheet. Extended 
+Mood: enables multi-mood priority weighting (primary / 
+secondary mood). Extended Duration: enables exact date / 
+departure time input. Extended Radius: enables manual km 
+entry (numeric input, 1–500 km) and exposes Budget Tier 
+selection (RF-WIZ04 default is Mid-Range). 
+High 
+US36 
+RF-
+WIZ14 
+Selection State 
+Persistence 
+Once all three buttons are selected, the landing screen MUST 
+display all three choices as a persistent 'trip brief' row directly 
+above the 'Generate' trigger zone. Each chip MUST be 
+tappable to reopen its selector sheet without resetting the 
+other selections. This row MUST persist across app reopens 
+(localStorage) for one session (24 h TTL) to enable quick re-
+generation. The same three chips are echoed on the Loading 
+Screen (see RF-WIZ12). 
+High 
+US36, US37 
+ 
+ 
+ 
+ 
+
+--- PAGE 13 ---
+Module: AI Wrapper & Prompt Engineering (RF-AI) 
+ID Name Description Priority Linked 
+US 
+RF-
+AI01 
+Prompt Construction The AI wrapper must construct a semantically structured prompt from 
+the wizard parameters. The prompt must explicitly encode: travel style, 
+departure city, max distance, duration, budget tier, group composition, 
+and transport mode. The prompt must instruct the model to respond 
+exclusively in valid JSON. When invoked via the fast-path (RF-
+WIZ09–11), unspecified parameters default to: Budget = Mid-
+Range, Group = 2 adults / 0 children, Transport = Car + Public 
+Transport. 
+High 
+US10 
+RF-
+AI02 
+Destination 
+Suggestion 
+The system must submit the constructed prompt to the DeepSeek API 
+and parse the response to extract 2–3 destination recommendations. 
+Each destination must include: name, country, a 2–3 sentence rationale, 
+and a rough distance from the departure point. 
+High 
+US10 
+RF-
+AI03 
+Destination Selection The system must present the AI-suggested destinations as selectable 
+cards. Upon user selection, the system must store the chosen 
+destination and trigger the full itinerary generation request (RF-AI04). 
+High 
+US11 
+RF-
+AI04 
+Full Itinerary 
+Generation 
+The system must generate a complete itinerary for the selected 
+destination. The itinerary must be structured by day, with each day 
+containing an ordered list of stops. Minimum itinerary length: 3 stops 
+for 'a few hours'; 5 stops per day for multi-day trips. 
+High 
+US12 
+RF-
+AI05 
+Per-Stop Content Each itinerary stop must include: stop name, category (restaurant / 
+museum / nature / landmark / activity), suggested arrival time 
+(HH:MM), estimated visit duration (minutes), and a 2–3 sentence AI-
+generated description contextualised to the user's travel style. 
+High 
+US12 
+RF-
+AI06 
+Inter-Stop Travel 
+Time 
+The itinerary must include, between each consecutive pair of stops, an 
+estimated travel time in minutes calculated relative to the user's 
+selected transport mode. A brief travel note (e.g., 'a 12-minute walk') 
+must be displayed between stop cards. 
+High 
+US13 
+RF-
+AI07 
+Single Stop 
+Regeneration 
+The system must support partial re-generation: when the user taps the 
+refresh icon on a single stop card, only that stop must be re-requested 
+from the AI API. The rest of the itinerary must remain unchanged. The 
+regenerated stop must be contextually consistent with adjacent stops. 
+High 
+US14 
+RF-
+AI08 
+Structured JSON 
+Output Schema 
+The AI API response must be parsed against a predefined JSON 
+schema. The schema must define: destination (object), days (array), 
+stops (array per day), each with fields: id, name, category, arrivalTime, 
+durationMinutes, description, coordinates (lat/lng). Malformed 
+responses must trigger the error handling flow (RF-ERR01). 
+High 
+US15 
+ 
+Module: Loading States & Error Handling (RF-LD / RF-ERR) 
+ID Name Description Priority Linked US 
+RF-
+LD01 
+Loading Screen While an AI API call is in progress, the system must display a 
+dedicated loading screen featuring: an animated compass icon, 
+a rotating set of contextual status messages (cycling every 2.5 
+s), a three-chip summary of the user's Mood / Duration / 
+Radius selections (see RF-WIZ12), and an indeterminate 
+progress bar. The loading screen must be displayed for any 
+API operation exceeding 400 ms. 
+High 
+US16, US37 
+RF-
+ERR01 
+API Failure 
+Handling 
+If the AI API returns an error, times out (> 15 s), or returns a 
+response that fails JSON schema validation, the system must: High US17 
+
+--- PAGE 14 ---
+(1) dismiss the loading screen, (2) display a user-friendly error 
+message specifying the nature of the failure, (3) offer a 'Retry' 
+button and an 'Edit Parameters' button. No raw error codes or 
+stack traces must be exposed to the user. 
+RF-
+ERR02 
+Geolocation 
+Fallback 
+If the browser Geolocation API is unavailable or the user 
+denies permission, the system must silently fall back to manual 
+city text input without displaying an error. Within the Radius 
+selector sheet (RF-WIZ11), a city text input must appear 
+within 500 ms of a geolocation timeout. The geolocation 
+toggle must display a 'Location unavailable' state. 
+High 
+US02, US34 
+RF-
+ERR03 
+Form Validation The wizard 'Next' button on each step must be disabled until all 
+required inputs for that step are in a valid state. Inline 
+validation error messages must appear below the offending 
+field immediately upon a failed navigation attempt. 
+High 
+US01–US08 
+ 
+Module: Visualisation (RF-VIS / RF-MAP) 
+ID Name Description Priority Linked US 
+RF-
+VIS01 
+List View — Day 
+Cards 
+The Results screen must display the itinerary as a vertically 
+scrollable list. Each day must be represented as a collapsible 
+section header. Within each day, stops must be displayed as 
+cards containing: arrival time, stop name, category chip, AI 
+description, and visit duration pill. 
+High 
+US18 
+RF-
+VIS02 
+Map View — 
+Leaflet.js 
+The Results screen must include an interactive Leaflet.js map 
+(tile source: OpenStreetMap) showing: a numbered pin for 
+each stop (using coordinates from the JSON response), a 
+dashed polyline connecting stops in sequence, and map 
+controls (zoom in/out, re-centre). 
+High 
+US19 
+RF-
+MAP01 
+Route Polyline 
+Styling 
+The connecting polyline must use a transport-adaptive stroke 
+pattern: solid line for car/train/flight; dashed line for walking; 
+dotted line for public transport. 
+Medium 
+US19 
+RF-
+MAP02 
+Stop Detail 
+Bottom Sheet 
+Tapping a map marker must open a bottom sheet displaying: 
+the stop number, name, category, suggested arrival time, visit 
+duration, and full AI description. The sheet must be 
+dismissible by swipe-down or tap-outside. 
+Medium 
+US20 
+RF-
+VIS03 
+View Mode Toggle A tab bar at the top of the Results screen must allow the user to 
+switch between List View (RF-VIS01) and Map View (RF-
+VIS02). The active tab must be visually indicated. View state 
+must be preserved on tab switch (no data reload). 
+Medium 
+US21 
+RF-
+VIS04 
+Destination 
+Header 
+The Results screen must display a full-bleed destination 
+photograph (sourced from the Unsplash API using the 
+destination name as search query, or a fallback placeholder), 
+overlaid with the destination name, country, and a mood-tag 
+chip matching the selected travel style. 
+Medium 
+US22 
+ 
+Module: Persistence & Export (RF-STO / RF-EXP) 
+ID Name Description Priority Linked US 
+RF-
+STO01 
+Auto-Save to 
+localStorage 
+Upon successful itinerary generation, the system must 
+automatically serialise the complete itinerary JSON object and 
+store it in the browser's localStorage under a unique key (uuid-
+High 
+US23 
+
+--- PAGE 15 ---
+v4). The entry must include: destination name, generation 
+timestamp, trip type, duration tier, and full itinerary payload. 
+Geolocation coordinates must NOT be persisted (NFR17); 
+only the resolved city name string. 
+RF-
+STO02 
+Trip History 
+Screen 
+The 'My Trips' screen must retrieve all saved itinerary entries 
+from localStorage and display them as a scrollable list of cards. 
+Each card must show: destination thumbnail, destination name, 
+trip type chip, generation date, and number of stops. 
+High 
+US24 
+RF-
+STO03 
+Delete Saved 
+Itinerary 
+The user must be able to delete a saved itinerary from the 
+history list via swipe-left gesture (mobile) or a delete button 
+(desktop). A confirmation modal must be shown before the 
+entry is permanently removed from localStorage. 
+Medium 
+US25 
+RF-
+STO04 
+History Search & 
+Filter 
+The 'My Trips' screen must include a search input field that 
+filters the displayed itinerary cards in real time by destination 
+name match. An empty state illustration must be shown when 
+no results match the query. 
+Low 
+US28 
+RF-
+EXP01 
+PDF Export The system must generate a PDF document of the current 
+itinerary using the jsPDF library (client-side, no server 
+required). The PDF must include: destination header with 
+photo, trip metadata, day-by-day stop list with times and 
+descriptions, and a footer with the generation date. 
+Medium 
+US26 
+RF-
+EXP02 
+Shareable Link The system must generate a shareable URL by encoding the 
+itinerary JSON as a Base64 query parameter. Tapping 'Copy 
+Link' must write the URL to the clipboard using the Clipboard 
+API and display a transient confirmation toast. 
+Low 
+US27 
+  
+
+--- PAGE 16 ---
+2.3  Non-Functional Requirements 
+Non-Functional Requirements define the quality attributes and operational constraints the 
+TravelMind system must satisfy, independently of specific functional behaviours. They are grouped 
+by quality category: Performance, Usability, Reliability, Maintainability, Security, and Portability.  
+ 
+ID Category Requirement Priority 
+NFR01 Performance The end-to-end flow from wizard submission to rendered itinerary (AI API call + 
+JSON parsing + UI render) must complete within 15 seconds under standard 4G 
+network conditions. API calls must implement a 15-second client-side timeout. 
+High 
+NFR02 Performance The Largest Contentful Paint (LCP) of the application's landing page must not 
+exceed 2.5 seconds on a simulated 4G connection (Chrome DevTools Throttling). 
+This target aligns with Google's Core Web Vitals 'Good' threshold. 
+High 
+NFR03 Performance Single Stop Regeneration (RF-AI07) must complete and re-render within 10 
+seconds. The regenerating card must display an inline spinner during the operation 
+without blocking the rest of the itinerary view. 
+Medium 
+NFR04 Performance The Leaflet.js map must render all stop markers and the route polyline within 500 
+milliseconds of the itinerary JSON being parsed, even for itineraries of up to 20 
+stops. 
+Medium 
+NFR05 Usability The full extended wizard flow (US01–US08) must be completable by a first-
+time user in under 2 minutes without any onboarding instructions. This target 
+must be validated through User Acceptance Testing with a minimum of 5 
+representative test users. 
+⚠ Reconciliation note: Scope clarification: this 2-minute target applies exclusively to the full 
+extended wizard (US01–US08). For the primary three-button fast-path flow, the completion 
+target is < 60 seconds, defined in NFR22, which supersedes NFR05 as the primary first-time 
+completion benchmark for the core user journey. 
+High 
+NFR06 Usability All interactive elements (buttons, chips, sliders, steppers) must have a minimum 
+touch target area of 48×48 dp, in accordance with Google's Material Design 
+accessibility guidelines. The three primary selector buttons (RF-WIZ09–RF-
+WIZ11) must meet the elevated 72×72 dp minimum defined in NFR23. 
+High 
+NFR07 Usability All error messages presented to the user must follow a three-part structure: (1) what 
+went wrong, (2) why it happened (where known), (3) what the user can do next. No 
+raw HTTP status codes, stack traces, or technical identifiers must be exposed. 
+High 
+NFR08 Usability The application must implement a visible focus indicator (outline or highlight) on 
+all interactive elements to support keyboard navigation. This is required for WCAG 
+2.1 Level AA compliance. 
+Medium 
+NFR09 Reliability The application must not enter an unrecoverable state (blank screen, infinite 
+loading, uncaught JavaScript exception visible to the user) during any of the use 
+cases defined in the Functional Requirements. All error paths must lead to a 
+recoverable UI state. 
+High 
+NFR10 Reliability Itinerary data stored in localStorage must survive browser refresh, tab closure, and 
+browser restart. Data must only be removed through explicit user action (RF-
+STO03) or programmatic localStorage.clear(). 
+High 
+NFR11 Reliability If the Unsplash API for destination photos is unavailable, the system must fall back 
+to a local placeholder image without blocking the rendering of the Results screen. Medium 
+NFR12 Maintainability The codebase must maintain a clear separation of concerns across three layers: 
+frontend UI (HTML/CSS/JS or React), AI wrapper (Node.js/Express backend), and 
+data persistence (localStorage utilities). No AI prompt logic must be embedded 
+directly in UI components. 
+High 
+
+--- PAGE 17 ---
+NFR13 Maintainability All prompt engineering logic (prompt templates, JSON schema definitions, 
+parameter injection functions) must be isolated in a dedicated module (e.g., 
+promptBuilder.js) to facilitate independent testing and iteration. 
+High 
+NFR14 Maintainability The application's colour palette, typography scale, and spacing tokens must be 
+defined as CSS custom properties (variables) in a dedicated :root stylesheet. No 
+hardcoded colour values must appear in component stylesheets. 
+Low 
+NFR15 Security The DeepSeek API key must never be exposed in client-side JavaScript. It must be 
+stored exclusively as a server-side environment variable and accessed only through 
+the backend API wrapper, which acts as a proxy for all AI requests. 
+High 
+NFR16 Security All user-provided text inputs (city name, any free-text fields) must be sanitised 
+before inclusion in API requests to prevent prompt injection attacks. A maximum 
+character limit must be enforced on all text fields. 
+High 
+NFR17 Security localStorage data must not contain personally identifiable information (PII) beyond 
+the user's explicitly submitted trip preferences. No raw geolocation coordinates 
+must be persisted in localStorage; only the city name string resolved from the 
+coordinates. 
+Medium 
+NFR18 Portability The application must render correctly and be fully functional on the latest stable 
+versions of Chrome, Firefox, and Safari (desktop and mobile). Polyfills must be 
+included for any Web API with less than 95% global browser support. 
+High 
+NFR19 Portability The application must be fully responsive across viewport widths from 360 px 
+(entry-level Android) to 1440 px (standard desktop). No feature must be restricted 
+to a specific viewport size; all functionality must be accessible at all breakpoints. 
+High 
+NFR20 Portability The application must be deployable as a static frontend (e.g., Vercel) with a 
+separate Node.js/Express backend (e.g., Railway or Render) using only free-tier 
+hosting services, with no dependency on paid infrastructure for the MVP. 
+Medium 
+NFR21 Performance The complete three-button flow (Mood tap → Duration tap → Radius tap → AI 
+generation triggered) MUST be completable in under 15 seconds of total user 
+interaction time on any device with an active internet connection. Each bottom 
+sheet MUST open within 100 ms of the button tap (no loading state permitted for 
+the selector sheets themselves). 
+CRITICAL 
+NFR22 Usability A first-time user with no onboarding instructions MUST be able to complete the 
+three-button flow and reach the Loading Screen in under 60 seconds. This target 
+MUST be validated in UAT as the primary success metric for the core fast-path 
+flow, superseding the 2-minute extended wizard target (NFR05) for this specific 
+journey. 
+CRITICAL 
+NFR23 Usability The three selector buttons on the landing screen (RF-WIZ09–RF-WIZ11) MUST 
+each have a minimum tap target of 72×72 dp, exceeding the standard 48×48 dp 
+minimum defined in NFR06, given their role as the primary interaction elements. 
+The buttons MUST be visually distinct from each other at all times through colour, 
+icon, and label differentiation. 
+High 
+NFR24 Accessibility Each mood tile, duration tile, and radius tile MUST carry an aria-label attribute 
+describing the option and its implication (e.g., aria-label="Relax — slow pace, 
+nature, spa experiences"). The sequential three-button flow MUST be fully 
+navigable via keyboard Tab and Enter without mouse interaction. 
+High 
+NFR25 Reliability If GPS location detection fails during the Radius selector sheet opening (RF-
+WIZ11), the system MUST display a city text input field within 500 ms of the 
+geolocation timeout — without dismissing the sheet or displaying a modal error. 
+The radius preset tiles MUST remain usable even if no departure city is resolved 
+(AI falls back to proximity-agnostic suggestions). 
+High 
+ 
+ 
+
+--- PAGE 18 ---
+3.  Requirement Analysis 
+This section provides the formal system analysis artefacts for TravelMind, translating the 
+requirements gathered in Section 2 into structured models of system behaviour, architecture, data 
+flow, and data storage. The models are designed to be internally co nsistent: entities defined in the 
+ERD (Section 3.6) correspond directly to the data stores in the DFD (Section 3.5), and all use cases 
+in the diagram (Section 3.1) are traceable to Functional Requirements in Section 2.2. 
+ 
+3.1  Use Case Diagram of the System 
+ 
+3.1.1  Actors 
+The TravelMind system involves four distinct actors, each representing a different class of system 
+participant: 
+ 
+Actor Type Description 
+User Primary Actor 
+The human end-user interacting with the TravelMind web application. 
+Encompasses both first-time visitors (unregistered session) and 
+returning users with saved trip history. Initiates all wizard and itinerary 
+flows. 
+AI Engine 
+(DeepSeek API) External System Actor 
+The Large Language Model API responsible for processing structured 
+prompts and returning destination suggestions and itinerary JSON. Acts 
+as a passive responder to requests from the Backend AI Wrapper 
+module. 
+Geolocation API 
+(Browser / OS) External System Actor 
+The browser-native or OS-level geolocation service that provides the 
+user's current coordinates for distance-based filtering. Interacts 
+exclusively with the frontend wizard component. 
+Media API 
+(Unsplash) External System Actor 
+The third-party image service used to retrieve destination photographs 
+for the Results screen header. Queried by the backend using the 
+destination name as a search term. 
+ 
+3.1.2  Complete Use Case Inventory 
+
+
+--- PAGE 19 ---
+The following table enumerates all 12 use cases for the TravelMind MVP. UC-10 (Auto-Save 
+Itinerary) has been dissolved: the auto-save behaviour (RF-STO01) is now modelled as an implicit 
+system response within UC-06 (Generate Itinerary) via an <<include>> arc, since auto-save is not 
+an independent user goal but a postcondition of successful generation. All RF traceability gaps and 
+actor omissions identified in the prior review have been resolved. 
+ID Use Case Name Primary Actor(s) Brief Description Linked 
+RF(s) 
+UML 
+Relations 
+UC-01 Enter Travel 
+Preferences (Fast-
+Path) 
+User User sequentially selects Mood, 
+Duration, and Radius via the three 
+bottom-sheet selectors on the 
+landing page. Selection state is 
+persisted in localStorage for 24 h. 
+Long-press on any button opens 
+extended options panel. 
+RF-WIZ09, 
+RF-WIZ10, 
+RF-WIZ11, 
+RF-WIZ12, 
+RF-WIZ13, 
+RF-WIZ14 
+<<include>> 
+UC-06 (auto-
+triggered on 
+third selection 
+via RF-
+WIZ12) 
+UC-02 Enter Travel 
+Preferences 
+(Extended Wizard) 
+User User completes the full six-step 
+wizard: trip type, location/distance, 
+duration, budget, group size, and 
+transport mode. Inline form 
+validation (RF-ERR03) governs 
+step-by-step progression. 
+RF-WIZ01, 
+RF-WIZ02, 
+RF-WIZ03, 
+RF-WIZ04, 
+RF-WIZ05, 
+RF-WIZ06, 
+RF-WIZ07, 
+RF-ERR03 
+— 
+UC-03 Activate Surprise Me 
+Mode 
+User, AI API User taps the Surprise Me entry 
+point on the landing page. All 
+wizard parameters (mood, duration, 
+radius, budget, group, transport) are 
+randomised within valid ranges and 
+AI generation is triggered 
+immediately, bypassing all selector 
+flows. 
+RF-WIZ08 <<include>> 
+UC-06 
+UC-04 Generate Destination 
+Suggestions 
+User, AI API System constructs a structured 
+prompt from extended wizard 
+parameters and submits it to the 
+DeepSeek API. Parses the response 
+to surface 2–3 destination 
+recommendations, each with name, 
+country, 2–3 sentence rationale, and 
+estimated distance. 
+RF-AI01, RF-
+AI02 
+<<extend>> 
+UC-05 
+(extended 
+wizard path 
+only; skipped 
+in fast-path) 
+UC-05 Select Destination User User selects one destination from 
+the AI-generated shortlist. Chosen 
+destination is stored and full 
+itinerary generation is triggered. 
+This step is entirely skipped in the 
+fast-path, where the AI resolves 
+destination internally. 
+RF-AI03 <<extend>> 
+of UC-04 
+(extended 
+wizard path 
+only); 
+<<include>> 
+UC-06 
+UC-06 Generate Itinerary User, AI API, 
+Local Storage 
+System constructs the final prompt, 
+submits it to DeepSeek, displays the 
+Loading Screen during processing 
+(RF-LD01), validates the JSON 
+response against schema (RF-
+AI08), and on success renders the 
+Results Screen (RF-VIS01, RF-
+VIS02, RF-VIS04) and auto-saves 
+the itinerary to localStorage (RF-
+STO01). All failure modes handled 
+per RF-ERR01. 
+RF-AI01, RF-
+AI04, RF-
+AI05, RF-
+AI06, RF-
+AI08, RF-
+LD01, RF-
+ERR01, RF-
+STO01, RF-
+VIS01, RF-
+VIS02, RF-
+VIS04 
+Triggered by 
+UC-01 
+<<include>>, 
+UC-03 
+<<include>>, 
+UC-05 
+<<include>> 
+UC-07 View Itinerary User User views the generated itinerary 
+as a chronological day-card list or 
+RF-VIS01, 
+RF-VIS02, 
+— 
+
+--- PAGE 20 ---
+ID Use Case Name Primary Actor(s) Brief Description Linked 
+RF(s) 
+UML 
+Relations 
+as an interactive Leaflet.js map. 
+Map view shows numbered 
+markers, transport-adaptive route 
+polyline, and destination header. 
+Tapping a marker opens a stop-
+detail bottom sheet. 
+RF-VIS03, 
+RF-VIS04, 
+RF-MAP01, 
+RF-MAP02 
+UC-08 Regenerate Stop User, AI API User taps the refresh icon on a 
+single stop card. Only that stop is 
+re-requested from the AI API; the 
+remainder of the itinerary is 
+preserved. The regenerated stop 
+must be contextually consistent 
+with adjacent stops. 
+RF-AI07 — 
+UC-09 Swap Destination User, AI API On the Results screen (fast-path 
+only), user taps the "Different 
+destination?" chip. The original 
+prompt is re-submitted with an 
+explicit instruction to exclude the 
+current destination and return the 
+next best match. Mood, Duration, 
+and Radius remain unchanged. 
+RF-AI09 — 
+UC-10 Manage Saved Trips User, Local 
+Storage 
+User accesses the My Trips screen 
+to browse all previously generated 
+itineraries. Each card shows 
+destination thumbnail, name, trip 
+type, generation date, and stop 
+count. User can search by 
+destination name (real-time filter) 
+and delete entries with confirmation 
+modal. 
+RF-STO02, 
+RF-STO03, 
+RF-STO04 
+— 
+UC-11 Export Itinerary 
+(PDF) 
+User User exports the current itinerary as 
+a client-side PDF via jsPDF. Output 
+includes destination header with 
+photo, trip metadata, day-by-day 
+stop list with times and 
+descriptions, and a generation-date 
+footer. 
+RF-EXP01 — 
+UC-12 Share Itinerary User User generates a shareable URL by 
+encoding the itinerary JSON as a 
+Base64 query parameter. Tapping 
+"Copy Link" writes the URL to the 
+clipboard via the Clipboard API 
+and displays a transient 
+confirmation toast. 
+RF-EXP02 — 
+ 
+▶  Revision Notes — v2 (Validated) 
+UC-10 (Auto-Save Itinerary) removed: auto-save is a system postcondition of UC-06, not a user-initiated goal. RF-STO01 is 
+now listed under UC-06. 
+UC-01 now includes RF-WIZ12, RF-WIZ13, RF-WIZ14 (auto-trigger, long-press, selection persistence). 
+UC-02 now includes RF-ERR03 (form validation governing wizard step progression). 
+UC-03 actors updated to include AI API (Surprise Me immediately triggers generation). 
+UC-06 actors updated to include Local Storage; RF links aligned with UC-06 narrative. 
+UC-07 now includes RF-VIS04, RF-MAP01, RF-MAP02 (destination header, polyline, stop detail sheet). 
+
+--- PAGE 21 ---
+All <<include>> and <<extend>> relationships are explicitly annotated. 
+ 
+3.2  Use Case Narrative — UC-06: Generate Itinerary 
+UC-06 is selected as the primary narrative because it exercises all three system layers (frontend, AI 
+wrapper, persistence), involves all three actor types, and constitutes the core value-delivery moment 
+of TravelMind. It is the convergence point for UC-01, UC-03, and UC-05. 
+Use Case ID UC-06 
+Use Case Name Generate Itinerary 
+Primary Actor User 
+Secondary Actors AI API (DeepSeek), Local Storage (Browser localStorage) 
+Trigger Completion of fast-path three-button flow (UC-01) → auto-triggered via RF-WIZ12; or 
+completion of extended wizard + destination selection (UC-05); or Surprise Me activation (UC-
+03). 
+Preconditions 1. User has completed Mood + Duration + Radius (fast-path) OR all six extended wizard steps. 
+2. DeepSeek API endpoint is reachable. 3. Browser supports localStorage (NFR10). 
+Postconditions 1. Results Screen fully rendered (list + map view). 2. Itinerary JSON persisted in localStorage 
+under UUID-v4 key. 3. User may proceed to UC-07, UC-08, UC-09, UC-11, or UC-12. 
+Priority CRITICAL 
+Estimated Effort 4 developer-days 
+Linked Requirements RF-AI01, RF-AI04, RF-AI05, RF-AI06, RF-AI08, RF-LD01, RF-ERR01, RF-STO01, RF-
+VIS01, RF-VIS02, RF-VIS04 
+ 
+Main Flow (Happy Path) 
+1. User completes preference input via either the three-button fast-path (UC-01) or the extended wizard (UC-
+02), with optional destination selection (UC-05) for the extended path. 
+2. System constructs a semantically structured prompt encoding: travel style, departure city/GPS, max distance, 
+duration, budget tier (default Mid-Range for fast-path), group composition (default 2 adults/0 children), and 
+transport mode (default Car + Public Transport). [RF-AI01] 
+3. System validates the constructed prompt against the predefined JSON schema template. 
+4. System submits prompt to DeepSeek LLM API via the Node.js/Express backend proxy. 
+5. Loading Screen is displayed: animated compass icon, rotating status messages (2.5 s cycle), three coloured 
+Mood/Duration/Radius chips, indeterminate progress bar. [RF-LD01] 
+6. AI API processes the request and returns a JSON response. 
+7. System validates the API response against the predefined JSON schema. [RF-AI08] 
+8. System parses validated JSON and populates the frontend data model. 
+9. System auto-saves: serialises complete itinerary JSON to localStorage under UUID-v4 key with destination 
+name, timestamp, trip type, duration tier, and full payload. [RF-STO01] 
+10. System renders Results Screen: full-bleed destination photo (RF-VIS04), day-card list view default (RF-VIS01), 
+map view toggle (RF-VIS02, RF-VIS03). 
+
+--- PAGE 22 ---
+11. Use case ends. User is now in UC-07 (View Itinerary). 
+ 
+Alternative Flows 
+ID Condition Behaviour 
+A1 API Timeout (> 15 s) At step 6, if the API does not respond within 15 seconds: dismiss loading screen, display user-
+friendly error message, offer Retry and Edit Parameters buttons. Flow returns to step 4 on Retry 
+or to UC-01/UC-02 on Edit. [RF-ERR01] 
+A2 JSON Schema 
+Validation Failure 
+At step 7, if the API response fails schema validation: treated as API error (RF-ERR01). One 
+automatic retry is attempted. If the second attempt also fails, the error state is shown with Retry 
+and Edit options. 
+A3 Unsplash API 
+Unavailable 
+At step 10, if the Unsplash API is unreachable: system silently falls back to a local placeholder 
+image without blocking Results Screen rendering. [NFR11] 
+A4 localStorage Quota 
+Exceeded 
+At step 9, if localStorage write fails due to quota limits: non-blocking toast notification suggests 
+the user delete old trips. Itinerary remains viewable in-session but is not persisted. 
+A5 Fast-Path Default 
+Override 
+At step 2, if the user used long-press extended options (RF-WIZ13) to specify budget or group 
+size: those explicit values replace the default Mid-Range / 2 adults / 0 children values in prompt 
+construction. 
+  
+
+--- PAGE 23 ---
+3.3  Use Case Priority Matrix 
+Priority scores are derived from a composite formula weighting Business Value (60%) and inverse 
+Implementation Complexity (40%). Scoring: H = 3, M = 2, L = 1. Formula: Score = (BV × 0.6 × 
+3.33) + ((4 − Complexity) × 0.4 × 3.33), normalised to a 1–10 scale. UC-10 (Auto-Save) has been 
+removed from the matrix; its function is absorbed into UC-06. 
+ID Use Case Name Business 
+Value Complexity Score /10 Impl. Order Sprint 
+UC-
+01 
+Enter Travel Preferences (Fast-
+Path) 
+H M 9 1 Sprint 1 — Core 
+UC-
+06 
+Generate Itinerary H H 8 2 Sprint 1 — Core 
+UC-
+04 
+Generate Destination 
+Suggestions 
+H H 8 3 Sprint 1 — Core 
+UC-
+07 
+View Itinerary H M 8 4 Sprint 1 — Core 
+UC-
+02 
+Enter Travel Preferences 
+(Extended Wizard) 
+H M 7 5 Sprint 2 — 
+Extended 
+UC-
+05 
+Select Destination H L 7 6 Sprint 2 — 
+Extended 
+UC-
+08 
+Regenerate Stop M H 6 7 Sprint 2 — 
+Extended 
+UC-
+09 
+Swap Destination M M 6 8 Sprint 3 — Polish 
+UC-
+10 
+Manage Saved Trips M M 5 9 Sprint 3 — Polish 
+UC-
+11 
+Export Itinerary (PDF) M M 5 10 Sprint 3 — Polish 
+UC-
+03 
+Activate Surprise Me Mode M L 5 11 Sprint 3 — Polish 
+UC-
+12 
+Share Itinerary L L 3 12 Sprint 3 — Polish 
+ 
+▶  Implementation Strategy — Sprint Allocation 
+Sprint 1 (UC-01, UC-06, UC-04, UC-07) delivers the complete fast-path value proposition: preference input → AI 
+generation → results viewing. These 4 use cases constitute the demo-ready MVP. 
+Sprint 2 (UC-02, UC-05, UC-08, UC-09) adds the extended wizard path and results-screen refinement capabilities. 
+Sprint 3 (UC-10, UC-11, UC-03, UC-12) delivers persistence management, export, Surprise Me, and social sharing as polish 
+features. 
+ 
+ 
+ 
+
+--- PAGE 24 ---
+ 
+Use Case Subgroups 
+Use cases are grouped into four functional clusters following the InCampus methodology: each 
+cluster is defined by shared actors or feature domain, contains a minimum of 3 use cases, and is 
+assigned a descriptive scope boundary. With the removal of UC-10 (Auto-Save), the former five-
+cluster model (which would have produced a one-UC "Persistence" cluster) has been consolidated 
+into four symmetric clusters of three use cases each. 
+Subgroup Name UC IDs Scope Description 
+Preference Input & 
+Configuration 
+UC-01, UC-02, UC-
+03 
+All entry points through which the user configures travel 
+parameters — fast-path three-button flow, extended six-step 
+wizard, and Surprise Me randomisation — before AI generation 
+is triggered. 
+AI Generation Pipeline UC-04, UC-05, UC-
+06 
+The sequential flow from prompt construction through optional 
+destination suggestion and selection, culminating in full 
+structured itinerary generation via the DeepSeek API. 
+Results Screen Interaction UC-07, UC-08, UC-
+09 
+All user interactions on the Results screen after itinerary 
+delivery: viewing list and map views, regenerating individual 
+stops, and swapping the AI-selected destination. 
+Itinerary Management & 
+Distribution 
+UC-10, UC-11, UC-
+12 
+Post-generation lifecycle of saved itineraries: browsing, 
+searching and deleting trip history, exporting to PDF for offline 
+use, and generating shareable links. 
+ 
+Preference Input & Configuration  ·  UC-01, UC-02, UC-03 
+All entry points through which the user configures travel parameters — fast-path three-button flow, extended six-step 
+wizard, and Surprise Me randomisation — before AI generation is triggered. 
+ 
+AI Generation Pipeline  ·  UC-04, UC-05, UC-06 
+The sequential flow from prompt construction through optional destination suggestion and selection, culminating in full 
+structured itinerary generation via the DeepSeek API. 
+ 
+Results Screen Interaction  ·  UC-07, UC-08, UC-09 
+All user interactions on the Results screen after itinerary delivery: viewing list and map views, regenerating individual stops, 
+and swapping the AI-selected destination. 
+ 
+Itinerary Management & Distribution  ·  UC-10, UC-11, UC-12 
+Post-generation lifecycle of saved itineraries: browsing, searching and deleting trip history, exporting to PDF for offline use, 
+and generating shareable links. 
+
+--- PAGE 25 ---
+3.4  System Architecture (Component Diagram) 
+ 
+1.  Architectural Overview 
+TravelMind follows a three-tier client-server architecture. The frontend runs entirely in the browser; the 
+backend is a lightweight Node.js/Express server acting exclusively as a secure proxy for the AI API; external 
+services are consumed by both tiers depending on sensitivity. The architectural design is driven by one primary 
+constraint: the DeepSeek API key must never be exposed to the client, requiring all LLM calls to be proxied 
+through the backend. 
+ 
+Tier Technology Responsibility Deployment 
+Frontend React / Vanilla JS + Leaflet.js + 
+jsPDF 
+UI rendering, user interaction, 
+localStorage management, client-
+side PDF generation, shareable link 
+encoding 
+Static hosting — Vercel 
+(free tier) 
+Backend Node.js + Express Prompt construction, JSON schema 
+validation, DeepSeek API proxying 
+— API key is stored as a server-
+side environment variable only 
+Node.js hosting — Railway 
+/ Render (free tier) 
+External 
+Services 
+DeepSeek LLM · Unsplash · 
+Geolocation API · Clipboard 
+API 
+LLM inference (backend-only), 
+destination photos, GPS 
+coordinates, clipboard write — 
+each consumed by the appropriate 
+tier 
+Third-party — no hosting 
+required 
+ 
+Core architectural decision — API key security 
+The DeepSeek API key is stored exclusively as a server-side environment variable (NFR15). The frontend never 
+receives the key at any point — all LLM requests are routed through the Express backend proxy, which injects the 
+key server-side before forwarding to the DeepSeek endpoint. This pattern prevents key exposure in browser 
+DevTools, network tab inspection, or client-side source code. 
+  
+
+
+--- PAGE 26 ---
+2.  Frontend Layer 
+The frontend is a single-page application (SPA) running in the browser. It is divided into three functional 
+modules: Input, Results, and Persistence. All modules share access to the localStorage Manager, which is the 
+single point of contact for browser storage operations. 
+ 
+Module Component Responsibility Linked RF(s) Priority 
+Input Landing Page [Fast-
+Path Buttons] 
+Renders the three sequential selector 
+buttons (Mood, Duration, Radius) as the 
+primary CTAs. Manages bottom-sheet 
+presentation, selection state, long-press 
+detection, and auto-trigger on third 
+selection. 
+RF-WIZ09–12 
+CRITICAL 
+ Extended Wizard 
+[6-Step Form] 
+Multi-step form collecting trip type, 
+location, duration, budget, group size, 
+and transport mode. Enforces per-step 
+validation; provides a review screen 
+before submission. 
+RF-WIZ01–07, 
+RF-ERR03 
+High 
+ Surprise Me 
+[Randomiser] 
+Single-tap entry point that generates 
+random valid values for all wizard 
+parameters and immediately triggers 
+prompt construction without any user 
+interaction. 
+RF-WIZ08 
+Medium 
+Results Results Screen 
+[Header + Day 
+Cards] 
+Renders the full-bleed destination 
+photo (Unsplash API), destination name 
+and mood chip, and the chronological 
+day-card list view as default. Provides 
+the view mode toggle to switch to Map 
+View. 
+RF-VIS01, RF-
+VIS03, RF-VIS04 
+High 
+ Leaflet.js Map View Interactive map rendering stop markers 
+(numbered), route polyline (transport-
+adaptive stroke pattern), and stop 
+detail bottom sheet on marker tap. Tile 
+source: OpenStreetMap. 
+RF-VIS02, RF-
+MAP01, RF-
+MAP02 High 
+ Loading Screen 
+[Status + Chips] 
+Displayed during any AI API call 
+exceeding 400 ms. Shows animated 
+compass icon, rotating status messages 
+(2.5 s cycle), the three trip brief chips 
+(Mood / Duration / Radius), and an 
+indeterminate progress bar. 
+RF-LD01 
+High 
+Persistence localStorage 
+Manager 
+Centralised utility module for all 
+browser storage operations. Handles 
+serialisation/deserialisation, UUID-v4 
+key generation, TTL enforcement for 
+selection state, and quota-exceeded 
+error handling. 
+RF-STO01, RF-
+WIZ14, NFR10, 
+NFR17 High 
+ My Trips Screen 
+[History + Search] 
+Retrieves all saved itinerary entries 
+from localStorage and renders them as 
+scrollable cards. Provides real-time 
+name-based search filtering and swipe-
+RF-STO02, RF-
+STO03, RF-
+STO04 Medium 
+
+--- PAGE 27 ---
+Module Component Responsibility Linked RF(s) Priority 
+left / delete-button deletion with 
+confirmation modal. 
+ PDF Exporter 
+[jsPDF] 
+Client-side PDF generation using the 
+jsPDF library. Produces a formatted 
+document including destination header, 
+trip metadata, day-by-day stop list, and 
+generation date footer. No server call 
+required. 
+RF-EXP01 
+Medium 
+ Share Link 
+Generator 
+Encodes the full itinerary JSON as a 
+Base64 URL query parameter. Writes 
+the resulting URL to the browser 
+Clipboard API and displays a transient 
+confirmation toast. 
+RF-EXP02 
+Low 
+  
+
+--- PAGE 28 ---
+3.  Backend Layer 
+The backend is a minimal Node.js/Express server with a single architectural responsibility: act as a secure proxy 
+between the frontend and the DeepSeek LLM API. It exposes two API endpoints, enforces prompt sanitisation, 
+handles JSON schema validation, and manages retry logic. It maintains no database and no session state — it is 
+entirely stateless between requests. 
+ 
+Component Responsibility Key Logic Linked 
+RF(s) File 
+Express Router Receives HTTP POST requests 
+from the frontend on two 
+routes: /api/generate (full 
+itinerary) and /api/regen 
+(single stop). Validates the 
+request body structure before 
+passing to Prompt Builder. 
+Route validation, 
+request body parsing, 
+CORS headers 
+NFR12, 
+NFR15 
+router.js 
+Prompt Builder 
+[promptBuilder.js] 
+Constructs a semantically 
+structured natural language 
+prompt from the incoming 
+validated parameters. Injects 
+fast-path defaults (Mid-Range, 
+2 adults, Car + Public 
+Transport) when fields are 
+absent. Appends the JSON 
+output schema instruction to 
+the prompt tail. 
+Parameter encoding, 
+default injection, 
+schema instruction 
+appending 
+RF-AI01, 
+NFR13 
+promptBuilder.js 
+JSON Schema 
+Validator 
+Validates the raw LLM 
+response against the 
+predefined itinerary JSON 
+schema before returning data 
+to the frontend. On validation 
+failure, triggers one automatic 
+retry. On second failure, 
+returns a structured error 
+response. 
+Schema enforcement, 
+one-retry logic, error 
+serialisation 
+RF-AI08, 
+RF-ERR01 
+validator.js 
+DeepSeek API 
+Proxy 
+Forwards the validated prompt 
+to the DeepSeek API endpoint 
+using the server-side API key 
+from the environment variable. 
+Enforces a 15-second client-
+side timeout. Returns the raw 
+API response to the schema 
+validator. 
+API key injection, 
+timeout enforcement, 
+HTTP error handling 
+NFR15, 
+RF-ERR01, 
+NFR16 
+deepseekProxy.js 
+ 
+ 
+ 
+
+--- PAGE 29 ---
+4.  External Services 
+Four external services are consumed by TravelMind. Each service is accessed by the appropriate tier: services 
+requiring secret credentials are called exclusively from the backend; browser -native APIs and CDN-hosted 
+libraries are called directly from the frontend. 
+ 
+Service Called By Purpose Auth Fallback Behaviour 
+DeepSeek 
+LLM API 
+Backend Primary AI inference — 
+destination suggestions and 
+full itinerary generation. All 
+requests proxied through the 
+Express backend to protect the 
+API key. 
+API key (env 
+var) 
+RF-ERR01: 15 s timeout 
+triggers retry (max 1). On 
+second failure, structured 
+error shown to user with 
+Retry and Edit Parameters 
+options. 
+Unsplash 
+Photo API 
+Frontend Destination header photograph 
+sourced by querying the 
+destination name. Used on the 
+Results Screen to render the 
+full-bleed destination image. 
+Public API key 
+(client-safe) 
+NFR11: if unavailable, local 
+placeholder image renders 
+silently — Results Screen 
+rendering is never blocked. 
+Browser 
+Geolocation 
+API 
+Frontend GPS coordinate detection 
+triggered automatically when 
+the Radius selector sheet opens 
+(UC-01 Fast-Path). Coordinates 
+are resolved to a city name 
+string; raw coordinates are 
+never persisted. 
+Browser 
+permission 
+prompt 
+RF-ERR02: on denial or 
+timeout, a city text input field 
+appears within 500 ms — the 
+radius preset tiles remain fully 
+usable without a resolved city. 
+Browser 
+Clipboard API 
+Frontend Used exclusively by the Share 
+Link Generator to write the 
+Base64-encoded itinerary URL 
+to the clipboard. Triggers a 
+transient toast notification on 
+successful write. 
+Browser 
+permission 
+(auto-granted) 
+On API unavailability (older 
+browsers), the URL is 
+displayed in a selectable text 
+field for manual copy. 
+  
+
+--- PAGE 30 ---
+5.  Key Architectural Decisions 
+ID Title Decision Rationale Trade-off 
+AD-
+01 
+No Server-Side 
+Database 
+All itinerary persistence 
+uses browser localStorage 
+exclusively. No relational 
+or document database is 
+deployed. 
+The MVP scope is single-
+user, single-device. A 
+database would add 
+infrastructure cost, 
+deployment complexity, 
+and latency without 
+delivering user-visible 
+value at this stage. 
+localStorage satisfies 
+NFR20 (free-tier hosting 
+constraint) and NFR10 
+(survives refresh/restart). 
+Data is device-scoped — a 
+user cannot access saved 
+trips from a different 
+browser or device. 
+Acceptable for MVP; a user 
+account system would be 
+the first extension post-
+MVP. 
+AD-
+02 
+Stateless Backend The Express backend 
+holds no session state, no 
+database connection, and 
+no in-memory cache 
+between requests. 
+A stateless backend can be 
+deployed on free-tier 
+serverless infrastructure 
+(Railway, Render) with 
+cold-start times 
+acceptable for the MVP 
+demo scenario. It also 
+simplifies horizontal 
+scaling if the application 
+were to grow beyond the 
+academic context. 
+No server-side caching of 
+identical prompts — 
+repeated identical requests 
+incur full API latency each 
+time. Acceptable at MVP 
+scale. 
+AD-
+03 
+Client-Side PDF 
+Generation 
+(jsPDF) 
+PDF export is generated 
+entirely in the browser 
+using the jsPDF library. No 
+server-side PDF rendering 
+is involved. 
+Client-side generation 
+eliminates the need for a 
+file server, reduces 
+backend complexity, and 
+satisfies the free-tier 
+hosting constraint. jsPDF 
+is mature, well-
+documented, and 
+sufficient for the 
+structured document 
+format required by RF-
+EXP01. 
+PDF visual fidelity is 
+limited compared to 
+server-side rendering 
+(Puppeteer, WeasyPrint). 
+Acceptable given the 
+simple tabular itinerary 
+format. 
+AD-
+04 
+Prompt Logic 
+Isolated in 
+Backend Module 
+All prompt engineering 
+logic (templates, schema 
+definitions, parameter 
+injection) lives exclusively 
+in promptBuilder.js on the 
+backend. 
+Isolating prompt logic 
+enables independent 
+iteration and testing of the 
+AI layer without touching 
+the UI. It also prevents 
+prompt injection from the 
+client side, since the 
+frontend only sends 
+structured parameter 
+objects — never raw text 
+that could manipulate the 
+prompt. 
+Any prompt change 
+requires a backend 
+deployment. Acceptable 
+given the slow iteration 
+rate of prompt engineering 
+relative to UI changes. 
+ 
+
+--- PAGE 31 ---
+3.5 DFD (DATA FLOW DIAGRAM)  
+DFD — Subgroup 1: Preference Input & Configuration 
+What this subgroup does Collects user travel preferences and constructs the structured prompt for 
+the AI. It never calls the API directly — its only output is a validated parameter object passed to 
+Subgroup 2. 
+Three entry points, one output The user can enter in three ways: Fast-Path (3 sequential taps 
+Mood → Duration → Radius), Extended Wizard (6-step form), or Surprise Me (single tap, full 
+randomisation). All three converge on the same validation process. 
+How data flows The user feeds P1, P2, or P3 depending on the chosen path. GPS input enters only 
+through P1 to resolve the departure city in the Radius selector. P1 reads and writes localStorage to 
+persist selections for 24h. P2 and P3 write to an in-memory buffer. All three input processes feed 
+into P4, which validates the parameters and injects missing defaults for the fast-path (Budget = 
+Mid-Range, Group = 2 adults / 0 children, Transport = Car + Public Transport). P4 passes the clean 
+parameters to P5, which encodes the final JSON prompt and forwards it to Subgroup 2. P5 also 
+writes the 3 summary chips back to localStorage for display on the loading screen. 
+Two data stores DS-SG1-001 is the localStorage store with a 24h TTL — it holds the fast-path 
+selections and the summary chips. DS-SG1-002 is an in-memory buffer — it exists only for the 
+duration of the wizard session and is destroyed after prompt construction completes. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+--- PAGE 32 ---
+Subgroup 2: AI Generation Pipeline 
+ 
+ 
+ 
+What it does Receives the structured prompt from Subgroup 1, manages all communication with 
+the DeepSeek API, and delivers a validated, persisted itinerary JSON to Subgroup 3 for rendering. 
+Two paths through the same pipeline On the fast-path, one API call is made and the AI returns a 
+full itinerary directly. On the extended wizard path, two calls are made: the first returns 2–3 
+destination suggestions which the user selects from (UC-04/05), the second generates the full 
+itinerary for the chosen destination (UC-06). Both paths exit through the same P4 process. 
+How data flows P1 fires the API request and simultaneously renders the loading screen with the 3 
+summary chips. The raw response hits P2, which validates it against the predefined JSON schema. 
+If validation fails, P2 triggers one automatic retry back to P1 — if that also fails, the user sees an 
+error state with Retry and Edit options. On success, validated data is written to the in-memory 
+request context (DS-SG2-001). P3 is only active on the extended path: it surfaces destination cards 
+to the user and, on selection, fires a second request back through P1. P4 reads the final itinerary 
+from DS-SG2-001, serialises it to localStorage under a UUID-v4 key, and both the raw JSON and 
+the save confirmation flow downstream to Subgroup 3. 
+Two data stores DS-SG2-001 is an in-memory context buffer holding the current API response — 
+cleared after the itinerary is forwarded. DS-SG2-002 is the localStorage itinerary store — persistent, 
+survives refresh, cleared only by explicit user action in Subgroup 4. 
+Mermaid DFD — Subgroup 3: Results Screen Interaction 
+ 
+ 
+How Subgroup 3 works 
+
+
+--- PAGE 33 ---
+What it does Receives the validated itinerary from Subgroup 2 and handles everything the user 
+sees and interacts with on the results screen — viewing, modifying individual stops, and swapping 
+the destination entirely. 
+How data flows The itinerary JSON from Subgroup 2 lands in both DS-SG3-001 (the active state 
+store) and P1 simultaneously. P1 renders the results screen: destination header with photo from 
+Unsplash (with a local placeholder fallback if the API is unavailable), and the day-card list view as 
+default. The user can toggle to map view, which routes the itinerary data through P2 — Leaflet.js 
+renders numbered markers and a transport-adaptive polyline; tapping a marker opens a stop detail 
+bottom sheet. If the user taps the refresh icon on a single stop, P3 reads the surrounding stops from 
+DS-SG3-001 for context, fires a targeted re-request to DeepSeek for that stop only, and merges the 
+result back into the active state without touching the rest of the itinerary. If the user taps "Different 
+destination?" (fast-path only), P4 reads the original prompt parameters from DS-SG3-001, re-
+submits the full prompt with an explicit exclusion instruction for the current destination, and on 
+response replaces the entire active itinerary and triggers P1 to re-render. The active itinerary in DS-
+SG3-001 is always the single source of truth — any modification by P3 or P4 goes through the store 
+first. 
+One data store DS-SG3-001 is the in-memory active itinerary state. It is populated by Subgroup 2 
+on first load, updated in-place by P3 (stop-level) or P4 (full replace), and read by Subgroup 4 for 
+export and sharing operations. 
+ 
+Mermaid DFD — Subgroup 4: Itinerary Management & Distribution 
+ 
+ 
+How Subgroup 4 works 
+What it does Manages the post-generation lifecycle of itineraries — browsing and deleting saved 
+trips, exporting to PDF, and generating shareable links. This subgroup never calls the AI API and 
+never modifies itinerary content. 
+How data flows DS-SG4-001 is the central localStorage trip history store, written to by Subgroup 2 
+automatically on every successful generation. P1 reads from it to populate the My Trips screen, 
+applying a real-time name filter if the user types a search query — an empty state illustration is 
+shown when no results match. P2 handles deletion: it shows a confirmation modal before removing 
+any entry from localStorage, then triggers P1 to refresh the list. P3 and P4 both read the active 
+
+
+--- PAGE 34 ---
+itinerary directly from Subgroup 3 — neither touches the history store. P3 passes the formatted 
+itinerary to the jsPDF library client-side (no server required) and delivers the PDF blob as a browser 
+download. P4 Base64-encodes the full itinerary JSON into a URL query parameter and writes it to 
+the Clipboard API, which triggers a transient confirmation toast to the user. 
+One data store DS-SG4-001 is the persistent localStorage trip history. It is the only store in this 
+subgroup — written by Subgroup 2, read and modified by P1 and P2. P3 and P4 operate entirely 
+from the in-memory active itinerary passed in from Subgroup 3 and produce no persistent side 
+effects. 
+ 
+ 
+ 
+How the unified DFD works 
+Overall flow The system is a strict left-to-right pipeline. Subgroup 1 collects and validates user 
+preferences and hands off a structured JSON prompt. Subgroup 2 fires the AI request, validates the 
+response, and produces a persisted itinerary. Subgroup 3 renders and lets the user modify the 
+results. Subgroup 4 manages the saved history and handles export and sharing. Each subgroup has a 
+clean input boundary and a clean output boundary — no subgroup reaches back into a prior one. 
+Inter-subgroup connections There are five cross-boundary flows. SG1→SG2 is the structured 
+prompt string. SG2→SG3 is the validated itinerary JSON flowing both into the render process and 
+directly into the active state store. SG2→SG4 is the auto-save write to the trip history localStorage 
+store, which happens in parallel with the render. SG3→SG4 are two read flows — the active in-
+memory itinerary is read by the PDF export and share link processes without touching the history 
+store. 
+API is called from two subgroups SG2 owns the primary generation calls. SG3 calls api 
+independently for single-stop regeneration and destination swap — these are partial re-requests that 
+bypass SG2 entirely and write their results directly back into the active itinerary state. 
+
+
+--- PAGE 35 ---
+Integrated CRUD Matrix 
+All Subgroups — Processes × Data Stores 
+ 
+1.  Data Store Reference 
+TravelMind uses five logical data stores across four subgroups. Two stores are localStorage-backed 
+(persistent across browser refresh); three are in-memory (session-scoped). The table below defines 
+each store, its persistence layer, lifetime, and owning subgroup. 
+ 
+Store ID Name Layer Lifetime Owner Description 
+DS-TM-001 Selection State localStorage 24 h TTL SG1 Fast-path selections {mood, duration, radius} and 
+trip brief chips. Persists across browser refresh 
+within the TTL window. 
+DS-TM-002 Wizard Params Buffer In-memory Session only SG1 Staging buffer for extended wizard or Surprise Me 
+parameters. Destroyed after prompt construction 
+completes. 
+DS-TM-003 API Request Context In-memory Session only SG2 Holds the current validated itinerary JSON object 
+between API response receipt and downstream 
+forwarding. 
+DS-TM-004 Trip History localStorage Permanent 
+(user-deleted) 
+SG2/SG4 All persisted itinerary entries indexed by UUID-
+v4. Written by SG2 on generation; read and 
+deleted by SG4. 
+DS-TM-005 Active Itinerary State In-memory Session only SG3 Single source of truth for the currently displayed 
+itinerary. Updated in-place by stop regeneration 
+and destination swap. 
+ 
+Store ownership rule 
+DS-TM-001 and DS-TM-002 are created and managed exclusively by Subgroup 1. No other subgroup writes to them after 
+prompt construction. 
+DS-TM-004 (Trip History) is written by Subgroup 2 on generation and managed (read/delete) by Subgroup 4. No other 
+subgroup modifies it. 
+DS-TM-005 (Active Itinerary State) is initialised by Subgroup 2 and subsequently modified only by Subgroup 3 processes. 
+2.  Legend 
+Each cell in the CRUD matrix contains one of the following operation codes. Combined codes (e.g., 
+RU) indicate that the process performs multiple operations in sequence within a single execution of 
+that use case. 
+ 
+C Create — the process creates a new record in the store 
+R Read — the process reads from the store without modifying it 
+U Update — the process modifies an existing record in the store 
+D Delete — the process removes a record from the store 
+
+--- PAGE 36 ---
+CR / RU / 
+RD 
+Combined — the process performs multiple operations in sequence 
+R* / U* Conditional — operation occurs only on a specific execution branch 
+— No interaction — the process does not touch this store 
+ 
+Methodology notes 
+CRUD is assigned only when the current DFD artifacts explicitly support the operation — no speculative entries. 
+Conditional operations (marked *) occur only on a specific execution branch as documented in the DFD alternative flows. 
+Combined codes are listed in execution order: CR means Create then Read; RD means Read then Delete. 
+In-memory stores (DS-TM-002, DS-TM-003, DS-TM-005) are included because they represent distinct logical data 
+boundaries between processes, even without physical persistence. 
+ 
+3.  Integrated CRUD Matrix 
+The matrix maps every process in TravelMind (rows, grouped by subgroup) against every data store 
+(columns). Read across a row to see which stores a process touches. Read down a column to see all 
+processes that interact with a given store. 
+ 
+Subgroup Process Notes 
+DS-TM-
+001 
+Selection 
+State 
+DS-
+TM-002 
+Wizard 
+Params 
+Buffer 
+DS-
+TM-003 
+API 
+Request 
+Context 
+DS-
+TM-004 
+Trip 
+History 
+DS-TM-
+005 
+Active 
+Itinerary 
+State 
+SG1 P1 — Capture Fast-Path 
+Selections 
+Reads cached selection state 
+on session restore; creates 
+or updates on each 
+confirmed tap. 
+CR — — — — 
+ P2 — Capture Extended 
+Wizard Inputs 
+Writes all 6 wizard step 
+values to the in-memory 
+buffer. 
+— C — — — 
+ P3 — Randomise 
+Parameters 
+Creates a fully randomised 
+parameter set in the in-
+memory buffer. 
+— C — — — 
+ P4 — Validate and Merge 
+Inputs 
+Reads from the wizard 
+buffer; injects fast-path 
+defaults where fields are 
+absent. 
+— R — — — 
+ 
+P5 — Construct AI 
+Prompt 
+Updates DS-TM-001 with 
+trip brief chips for loading 
+screen display; clears the 
+wizard buffer after prompt 
+construction. 
+U D — — — 
+SG2 P1 — Submit Request & 
+Manage Loading State 
+Reads trip brief chips from 
+DS-TM-001 to display on 
+the loading screen. 
+R — — — — 
+ 
+P2 — Validate JSON 
+Response Schema 
+Creates the validated 
+itinerary object in the in-
+memory request context 
+after successful schema 
+check. 
+— — C — — 
+
+--- PAGE 37 ---
+Subgroup Process Notes 
+DS-TM-
+001 
+Selection 
+State 
+DS-
+TM-002 
+Wizard 
+Params 
+Buffer 
+DS-
+TM-003 
+API 
+Request 
+Context 
+DS-
+TM-004 
+Trip 
+History 
+DS-TM-
+005 
+Active 
+Itinerary 
+State 
+ 
+P3 — Resolve Destination 
+Extended wizard path only. 
+Reads the current request 
+context to re-submit the 
+prompt with a specific 
+destination. 
+— — R* — — 
+ 
+P4 — Persist & Forward 
+Itinerary 
+Reads the validated 
+itinerary from the request 
+context; creates a persisted 
+entry in Trip History (DS-
+TM-004); initialises Active 
+Itinerary State (DS-TM-
+005). 
+— — R C C 
+SG3 P1 — Render Results 
+Screen 
+Reads trip brief chips for the 
+destination header; reads 
+active itinerary for list view 
+rendering. 
+R — — — R 
+ 
+P2 — Render Map View 
+Read-only consumption of 
+stop coordinates and 
+transport mode from active 
+itinerary state. 
+— — — — R 
+ 
+P3 — Regenerate Single 
+Stop 
+Reads adjacent stops for 
+contextual consistency; 
+updates the single stop in 
+active state after AI 
+response. 
+— — — — RU 
+ 
+P4 — Swap Destination 
+Reads original prompt 
+params from active state; 
+fully replaces the itinerary 
+with the new AI response. 
+— — — — U* 
+SG4 P1 — Browse & Search 
+Trip History 
+Read-only; filters records in 
+real time by destination 
+name match. 
+— — — R — 
+ P2 — Delete Saved 
+Itinerary 
+Reads the target record to 
+populate the confirmation 
+modal; permanently deletes 
+after user confirmation. 
+— — — RD — 
+ P3 — Export Itinerary 
+PDF 
+Read-only access to active 
+itinerary; no store 
+modification. 
+— — — — R 
+ P4 — Generate Shareable 
+Link 
+Read-only access to active 
+itinerary; Base64-encodes 
+payload into URL. 
+— — — — R 
+ 
+ 
+ 
+ 
+
+--- PAGE 38 ---
+3.6 ERD (DATA FLOW DIAGRAM)  
+Mermaid — ERD 
+ 
+Entity Relationship Diagram 
+TravelMind does not use a relational database — all persistence is handled through browser localStorage using 
+serialised JSON objects. The ERD below models the logical data entities and their relationships as they exist 
+
+
+--- PAGE 39 ---
+within the serialised payload structure. This logical model governs how the frontend constructs, stores, and 
+retrieves itinerary data, and how the backend JSON schema validates AI responses. 
+ 
+Scope note 
+The ERD represents the logical data model, not a physical database schema. All entities are serialised as nested JSON 
+and stored in localStorage under a single UUID-v4 key per itinerary (DS-TM-004). SELECTION_STATE is stored 
+separately in DS-TM-001. 
+ 
+1.1  Entity Descriptions 
+Entity Storage PK Relationships Description 
+ITINERARY DS-TM-004 
+[localStorage] 
+id (uuid-v4) 1 Itinerary → N Days Root entity representing a 
+complete generated travel 
+plan. Each instance is the 
+direct output of one AI 
+generation call. Stored as the 
+top-level object in the 
+serialised JSON blob. 
+DAY Nested in 
+ITINERARY 
+id 1 Day → N Stops Represents a single calendar 
+day within the itinerary. 
+Multi-day trips contain 
+multiple DAY entities in 
+sequence. Single-day and few-
+hours trips contain exactly 
+one DAY. 
+STOP Nested in DAY id 1 Stop → 0..1 
+TRAVEL_SEGMENT 
+(as origin); 0..1 
+TRAVEL_SEGMENT 
+(as destination) 
+The atomic unit of the 
+itinerary — a single named 
+location with visit metadata. 
+Each stop carries the 
+coordinates required for 
+Leaflet.js map rendering and 
+the AI-generated description 
+for the detail card. 
+TRAVEL_SEGMENT Nested in DAY 
+alongside 
+STOPs 
+id Many-to-one with 
+STOP (from and to) 
+Represents the transit leg 
+between two consecutive 
+stops. Each segment carries 
+the estimated travel time and 
+a transport-specific narrative 
+note (e.g., "a 12-minute 
+walk"). The last stop in a day 
+has no outbound segment. 
+SELECTION_STATE DS-TM-001 
+[localStorage 
+· 24 h TTL] 
+id 0..1 → 1 ITINERARY 
+(generated from) 
+Persists the three fast-path 
+selections across browser 
+sessions within the TTL 
+window, enabling quick re-
+generation without re-
+selecting. Also stores the trip 
+brief chips displayed on the 
+Loading Screen. Logically 
+
+--- PAGE 40 ---
+Entity Storage PK Relationships Description 
+associated with the most 
+recently generated Itinerary. 
+ 
+1.2  STOP Entity — Full Attribute Specification 
+STOP is the most information-dense entity and directly drives both the list view rendering (RF -VIS01) and the 
+map view rendering (RF-VIS02, RF-MAP02). Every field maps to a specific UI element or RF requirement. 
+ 
+Attribute Type Constraint Source UI / RF Mapping 
+id string PK, required Generated 
+(UUID-v4) 
+Internal key for 
+stop regeneration 
+targeting (RF-AI07) 
+dayId string FK, required Parent DAY 
+entity 
+Groups stop under 
+the correct day 
+section in list view 
+orderIndex integer ≥ 0, required AI response 
+(position in 
+array) 
+Controls rendering 
+order within a day 
+card (RF-VIS01) 
+name string required AI-generated Stop card title — 
+displayed in list 
+view and map 
+marker label 
+category string enum: 
+restaurant|museum|nature|landmark|activity 
+AI-generated Category chip 
+colour on stop card 
+(RF-AI05, RF-
+VIS01) 
+arrivalTime string HH:MM format AI-generated Time label on stop 
+card (RF-AI05) 
+durationMinutes integer > 0 AI-generated Duration pill on 
+stop card (RF-
+AI05) 
+description string 2–3 sentences AI-generated Body text in stop 
+card and stop detail 
+bottom sheet (RF-
+MAP02) 
+latitude float required AI-generated Leaflet.js marker 
+position (RF-
+VIS02). Never 
+persisted raw to 
+localStorage 
+beyond the 
+itinerary payload 
+(NFR17 does not 
+apply — these are 
+place coordinates, 
+
+--- PAGE 41 ---
+Attribute Type Constraint Source UI / RF Mapping 
+not user 
+coordinates) 
+longitude float required AI-generated Leaflet.js marker 
+position (RF-
+VIS02) 
+  
+
+--- PAGE 42 ---
+ 
+Mermaid — Sequence Diagram (Fast-Path Happy Path) 
+ 
+ 
+ 
+
+
+--- PAGE 43 ---
+Part 2 — Sequence Diagram 
+The sequence diagram models the primary happy-path flow of TravelMind: a user completing the three-button 
+fast-path (UC-01) through to a fully rendered Results Screen (UC-06, UC-07). It covers all six participants, the 
+loading state, the retry branch, and the error state. This is the most critical flow in the system — it is the end-to-
+end path that must work flawlessly for Sprint 1 acceptance. 
+ 
+2.1  Participants 
+Participant Type Role in this Flow 
+User External Actor Initiates all three selector taps; receives loading feedback and final 
+rendered results. 
+Frontend 
+[Browser] 
+Component Manages all UI state transitions: bottom sheets, loading screen, results 
+rendering, localStorage writes. 
+Geolocation 
+API 
+External Service Supplies GPS coordinates when the Radius sheet opens. City name is 
+resolved from coordinates before display. 
+localStorage Data Store Persists selection state (with 24 h TTL) and the final serialised 
+itinerary upon successful generation. 
+Backend 
+[Express] 
+Component Receives the parameter object from the frontend, builds the prompt, 
+proxies the request to DeepSeek, validates the response schema, and 
+returns clean JSON. 
+DeepSeek LLM 
+API 
+External Service Performs AI inference and returns a raw JSON response. Subject to 15 
+s client-side timeout. 
+Unsplash API External Service Supplies the destination photo for the Results Screen header. Called 
+only after successful itinerary generation. 
+ 
+2.2  Step-by-Step Flow Description 
+Phase 1 — Mood Selection (Steps 1–5) 
+# From To Description 
+1 User Frontend User taps the Mood button. The Mood button is the primary CTA — visually 
+dominant, minimum 72×72 dp (NFR23). 
+2 Frontend User Frontend opens the Mood bottom sheet in under 100 ms (NFR21). Sheet 
+presents 6 mood tiles with icon, label, and one-line descriptor. 
+3 User Frontend User selects one or more mood tiles. Multi-selection is supported (RF-WIZ09). 
+4 Frontend localStorage Frontend writes the mood selection to DS-TM-001. A 150 ms confirm 
+animation plays (RF-WIZ09). 
+5 Frontend User Sheet dismisses. The Duration button becomes the new visually dominant 
+element. 
+ 
+
+--- PAGE 44 ---
+Phase 2 — Duration & Radius Selection (Steps 6–13) 
+# From To Description 
+6 User Frontend User taps the Duration button. Sheet opens in < 100 ms with 4 duration tiles, 
+each showing an AI hint (RF-WIZ10). 
+7 User Frontend User selects exactly one duration tile. Sheet dismisses. Radius button 
+becomes dominant. 
+8 User Frontend User taps the Radius button. 
+9 Frontend Geolocation 
+API 
+GPS detection triggered automatically as the Radius sheet opens (RF-WIZ11). 
+10 Geolocation 
+API 
+Frontend API returns GPS coordinates. Frontend resolves to city name string. Raw 
+coordinates are not stored (NFR17 — place coordinates are exempt; only 
+user GPS coordinates are restricted). 
+11 Frontend User Radius sheet opens displaying the resolved city name above the 5 distance 
+presets (RF-WIZ11). 
+12 User Frontend User selects one radius preset. 
+13 Frontend localStorage All three selections (mood, duration, radius + city) written to DS-TM-001. 
+Trip brief chips persisted with 24 h TTL (RF-WIZ14). 
+ 
+Phase 3 — Auto-Trigger & Loading Screen (Steps 14–16) 
+# From To Description 
+14 Frontend Frontend 300 ms delay after Radius confirm animation. No user action required — 
+generation triggers automatically (RF-WIZ12). 
+15 Frontend User Frontend navigates to Loading Screen. Displays: animated compass icon, the 
+3 trip brief chips (Mood / Duration / Radius in their brand colours), rotating 
+contextual status messages every 2.5 s, and an indeterminate progress bar 
+(RF-LD01). 
+16 Frontend Backend Frontend sends POST /api/generate with the validated parameter object: 
+{mood, duration, radius, cityName} plus defaults to be injected server-side. 
+ 
+Phase 4 — Backend Processing (Steps 17–20) 
+# From To Description 
+17 Backend Backend Express Router receives the request. Prompt Builder (promptBuilder.js) 
+constructs a semantically structured natural language prompt, encoding all 7 
+parameters. Fast-path defaults injected: Budget = Mid-Range, Group = 2 
+adults / 0 children, Transport = Car + Public Transport (RF-AI01). 
+18 Backend Backend Prompt Builder appends the JSON output schema instruction: model is 
+instructed to respond exclusively in valid JSON conforming to the predefined 
+schema (RF-AI08). 
+
+--- PAGE 45 ---
+# From To Description 
+19 Backend DeepSeek LLM 
+API 
+Backend forwards the constructed prompt to the DeepSeek API endpoint, 
+injecting the API key from the server-side environment variable (NFR15). A 
+15-second client-side timeout is enforced (NFR01). 
+20 DeepSeek 
+LLM API 
+Backend DeepSeek returns a raw JSON response containing the itinerary object. 
+ 
+Phase 5 — Validation & Response (Steps 21–24) 
+# From To Description 
+21 Backend Backend JSON Schema Validator checks the response against the predefined schema: 
+destination object, days array, stops array per day, each with id, name, 
+category, arrivalTime, durationMinutes, description, and coordinates. If 
+validation fails, one automatic retry is triggered (back to Step 19). If the 
+second attempt also fails, a structured error response is returned. 
+22 Backend Frontend Backend returns the validated itinerary JSON to the frontend. 
+23 Frontend localStorage Frontend auto-saves the complete itinerary JSON to DS-TM-004 under a 
+UUID-v4 key with destination name, generation timestamp, trip type, 
+duration tier, and full payload (RF-STO01). 
+24 Frontend Unsplash API Frontend queries the Unsplash API using the destination name as the search 
+query to retrieve the header photo. 
+ 
+Phase 6 — Results Rendering (Steps 25–26) 
+# From To Description 
+25 Unsplash 
+API 
+Frontend Unsplash returns a photo blob. If unavailable, the frontend silently falls back 
+to a local placeholder image — Results Screen rendering is never blocked 
+(NFR11). 
+26 Frontend User Frontend renders the Results Screen: full-bleed destination photo header 
+with destination name and mood chip, day-card list view as default (RF-
+VIS01), map view toggle available (RF-VIS02, RF-VIS03). Use case UC-06 is 
+complete; user is now in UC-07. 
+ 
+
+--- PAGE 46 ---
+4.  On-Screen Appearance Requirements 
+ 
+This section defines the complete visual and interaction specification for every TravelMind screen. The 18 UI 
+Requirements below are directly traceable to the Functional Requirements established in Section 2 and 
+constitute the authoritative source for frontend implementation decisions. 
+ 
+4.1 Hand-Drawn Sketches 
+ 
+ 
+
+
+--- PAGE 47 ---
+ 
+ 
+4.2 UI Requirements 
+The following table governs layout, component dimensions, colour application, typography, state transitions, 
+and responsiveness for each screen in the TravelMind MVP. Each requirement is assigned a MoSCoW 
+priority and cross-referenced to its originating Functional Requirement. 
+ 
+ID Screen Requirement Priority Linked RF 
+UIR-
+01 
+Landing The landing page MUST display the three selector buttons 
+(Mood, Duration, Radius) as the dominant visual element, 
+centred vertically in the viewport. Each button must render at 
+minimum 72x72 dp, use the brand colour fill (#1A6B8A), and 
+carry an icon (48 dp) above a label (16 pt, Outfit 800). 
+Unselected state: solid fill. Selected state: Forest Green 
+#2E9E6B fill + white checkmark overlay. 
+CRITICAL 
+RF-WIZ09–11 
+
+
+--- PAGE 48 ---
+ID Screen Requirement Priority Linked RF 
+UIR-
+02 
+Landing The TravelMind logotype (Outfit 800, 32 pt, #1A6B8A) and 
+tagline (Inter Regular, 14 pt, #6B7280) must appear above the 
+button cluster. The 'Surprise Me' CTA must render below the 
+cluster as a ghost button (border: 1.5 px #1A6B8A, fill: 
+transparent, label: Inter SemiBold 14 pt). 
+High 
+RF-WIZ08 
+UIR-
+03 
+Bottom 
+Sheet — 
+Mood 
+The Mood selector bottom sheet must render as a modal 
+overlay with 12 px top-corner radius, white fill, and a drag 
+handle (4x40 px, #D1D5DB, centred). The 6 mood tiles must be 
+arranged in a 2x3 grid. Each tile: 80x80 dp, 12 px radius, icon 
+40 dp centred, label 13 pt SemiBold below icon, descriptor 11 pt 
+#6B7280. Selected tile: #EBF4F8 background + 2 px #1A6B8A 
+border. 
+CRITICAL 
+RF-WIZ09 
+UIR-
+04 
+Bottom 
+Sheet — 
+Duration 
+The Duration selector bottom sheet must display 4 duration tiles 
+in a 2x2 grid. Each tile: 100x80 dp, same radius/border spec as 
+UIR-03. Each tile must include an AI hint line (11 pt, #6B7280, 
+italic) below the label (e.g., '5-8 stops · day trip'). The sheet 
+must include a 'Confirm' button (full-width, #1A6B8A fill, 48 dp 
+height, Inter SemiBold 16 pt, white). 
+CRITICAL 
+RF-WIZ10 
+UIR-
+05 
+Bottom 
+Sheet — 
+Radius 
+The Radius selector bottom sheet must display 5 preset tiles in 
+a single-column vertical list. Each row: 64 dp height, icon left 
+(32 dp), label centre (Inter SemiBold 14 pt), distance descriptor 
+right (Inter Regular 12 pt, #6B7280). The detected city name 
+must appear above the list as a pill chip (#EBF4F8 fill, pin 
+prefix, Inter Medium 13 pt, #1A6B8A text). 
+CRITICAL 
+RF-WIZ11 
+UIR-
+06 
+Landing Button state transitions must use 150 ms ease-in-out animation. 
+The auto-trigger navigation to the Loading screen must be 
+preceded by a 300 ms ripple confirm animation on the last 
+selected button. Long-press (500 ms) must trigger haptic 
+feedback pulse (where supported) and expand the bottom 
+sheet to its extended options panel via a 200 ms slide-up. 
+High 
+RF-WIZ12–13 
+UIR-
+07 
+Landing The persistent 'trip brief' row must render as a horizontally 
+scrollable chip bar, pinned 16 dp above the Generate trigger 
+zone. Each chip: rounded pill (24 dp height), colour-coded per 
+RF-WIZ12 spec (Mood: #1A6B8A, Duration: #2E9E6B, Radius: 
+#F47B20), label Inter Medium 13 pt white, 8 dp horizontal 
+padding. Tapping a chip must reopen its sheet without resetting 
+other selections. 
+High 
+RF-WIZ14 
+UIR-
+08 
+Loading 
+Screen 
+The loading screen must display: (1) animated compass SVG 
+icon (64 dp, stroke animation 1.5 s loop, #1A6B8A), (2) rotating 
+status message (Inter Regular 15 pt, #1E2D3D, fade transition 
+400 ms between messages), (3) the three trip brief chips, (4) a 
+linear indeterminate progress bar (4 dp height, #1A6B8A fill, full 
+width, 60 dp from bottom of chip bar). Background: #EBF4F8 
+full-bleed. 
+High 
+RF-LD01 
+UIR-
+09 
+Results 
+— 
+Header 
+The destination header must render as a full-bleed image (100 
+vw x 240 dp, object-fit: cover) with a bottom-to-top linear 
+gradient overlay (#1E2D3D 0% to 80% alpha). Over the 
+gradient: destination name (Outfit 800, 28 pt, white), country 
+line (Inter Regular 14 pt, #EBF4F8), and mood-tag chip (same 
+pill spec as UIR-07, bottom-left, 16 dp margin). The 'Different 
+destination?' chip must render bottom-right, ghost style, 12 pt. 
+High 
+RF-VIS04, 
+RF-AI09 
+
+--- PAGE 49 ---
+ID Screen Requirement Priority Linked RF 
+UIR-
+10 
+Results 
+— List 
+View 
+Each day section header: Inter SemiBold 16 pt, #1E2D3D, with 
+collapse/expand chevron right-aligned. Each stop card: 16 dp 
+horizontal margin, 12 dp vertical padding, 8 px radius, white fill, 
+1 px #E5E7EB border. Internal layout: arrival time pill (top-left, 
+#EBF4F8, 11 pt), stop name (Inter SemiBold 15 pt), category 
+chip (colour-coded: restaurant #F47B20, museum #1A6B8A, 
+nature #2E9E6B, landmark #6B7280), description (Inter 
+Regular 13 pt, 3 lines max with expand), duration pill (bottom-
+right). Inter-stop travel note: 11 pt italic #9CA3AF, 24 dp indent. 
+High 
+RF-VIS01, 
+RF-AI06 
+UIR-
+11 
+Results 
+— Map 
+View 
+The Leaflet.js map must occupy 100% of the Results screen 
+below the header. Stop markers: custom SVG pins (32x40 dp), 
+numbered 1-N (Inter Bold 14 pt white, centred), fill #1A6B8A, 
+active/selected state fill #F47B20. Route polyline: 3 px stroke, 
+transport-adaptive pattern (solid: car/train/flight, dashed 8/4: 
+walking, dotted 4/4: public transport), colour #1A6B8A. Map 
+zoom controls must be positioned bottom-right, 16 dp margin. 
+High 
+RF-VIS02, 
+RF-MAP01 
+UIR-
+12 
+Results 
+— Stop 
+Detail 
+The stop detail bottom sheet (triggered by marker tap) must 
+render with max-height 60 vh, drag-to-dismiss, and the following 
+layout: stop number badge (#1A6B8A, 32 dp circle, white 
+number top-left), stop name (Outfit 800, 20 pt), category chip, 
+arrival time + duration in a two-cell row (Inter Regular 13 pt, 
+icons left), full description (Inter Regular 14 pt, #4B5563, no line 
+clamp), 'Regenerate Stop' ghost button (bottom, full-width). 
+Medium 
+RF-MAP02, 
+RF-AI07 
+UIR-
+13 
+Results The view mode toggle tab bar must be pinned below the 
+destination header. Tab bar height: 48 dp. Active tab: Inter 
+SemiBold 14 pt #1A6B8A, 2 px bottom border #1A6B8A. 
+Inactive tab: Inter Regular 14 pt #6B7280. Tab bar background: 
+white, 1 px bottom border #E5E7EB. Switching tabs must not 
+trigger any loading state or data re-fetch. 
+Medium 
+RF-VIS03 
+UIR-
+14 
+My Trips Each trip card must be 80 dp height, full-width minus 32 dp 
+margin, with: thumbnail (80x80 dp, 8 px radius, object-fit: cover, 
+left-aligned), destination name (Inter SemiBold 15 pt, 
+#1E2D3D), trip type chip, generation date (Inter Regular 12 pt, 
+#9CA3AF), stop count (Inter Regular 12 pt, #6B7280). Swipe-
+left on mobile reveals a red delete action zone (40 dp wide, 
+#C0392B fill, trash icon). Empty state: centred illustration + 'No 
+trips yet' (Inter Regular 16 pt, #9CA3AF). 
+High 
+RF-STO02–
+03 
+UIR-
+15 
+PDF 
+Export 
+The exported PDF must follow A4 portrait layout with: header 
+block (destination photo full-width 80 mm, destination name 
+Outfit 800 24 pt, generation date 10 pt), day section headers 
+(14 pt SemiBold, #1A6B8A underline rule), per-stop rows (stop 
+name 12 pt Bold, arrival time + duration inline, description 10 pt 
+Regular, 4 mm bottom margin), footer (TravelMind logotype left, 
+page number right, 8 pt, #9CA3AF). Static map image inserted 
+as last page if available. 
+Medium 
+RF-EXP01 
+UIR-
+16 
+All 
+Screens 
+Error state components must follow a three-part layout: (1) icon 
+(warning triangle SVG, 48 dp, #F47B20), (2) title (Inter 
+SemiBold 18 pt, #1E2D3D), (3) body text (Inter Regular 14 pt, 
+#4B5563, max 3 lines). Two action buttons below: primary 
+('Retry', #1A6B8A fill), secondary ('Edit Parameters', ghost). No 
+raw HTTP codes, stack traces, or technical identifiers may be 
+visible. Toast notifications: 48 dp height, 8 px radius, #1E2D3D 
+fill, white text, 3 s auto-dismiss. 
+High 
+RF-ERR01–
+03 
+
+--- PAGE 50 ---
+ID Screen Requirement Priority Linked RF 
+UIR-
+17 
+All 
+Screens 
+All screens must be fully responsive across 360-1440 px 
+viewport widths. Breakpoints: mobile < 768 px (single column, 
+bottom sheets), tablet 768-1024 px (two-column results), 
+desktop > 1024 px (sidebar list + full-screen map). No feature 
+may be hidden or disabled at any breakpoint. Horizontal 
+scrolling must be absent at all viewport widths. 
+High 
+RF-RESP01, 
+NFR19 
+UIR-
+18 
+All 
+Screens 
+The complete colour palette, typography scale, and spacing 
+tokens must be declared as CSS custom properties in a 
+dedicated :root block. Component stylesheets must reference 
+variables exclusively — no hardcoded hex values. Font stack: 
+'Outfit', sans-serif for headings, 'Inter', sans-serif for body. Base 
+spacing unit: 4 dp. Border radius scale: 4/8/12/24 dp. Box 
+shadows: level-1 '0 1px 3px rgba(0,0,0,0.08)', level-2 '0 4px 
+12px rgba(0,0,0,0.12)'. 
+Low 
+NFR14 
+ 
+  UI Requirements — Coverage Summary 
+18 UI requirements defined across 8 distinct screen contexts. CRITICAL priority: UIR-01, UIR-03, UIR-04, 
+UIR-05 (fast-path core flow). High priority: 10 requirements. Medium: 3. Low: 1. All requirements reference 
+the brand design system (UIR-18) and the responsive breakpoint specification (UIR-17). 
+ 
+  
+
+--- PAGE 51 ---
+5.  Project Time Management 
+This section presents the complete project schedule for the TravelMind MVP, structured across four 
+complementary artefacts: Work Breakdown Structure (Section 5.1), Critical Path Analysis (Section 5.2), 
+Slack Analysis (Section 5.3), and Cost-Benefit Analysis (Section 5.4). The schedule baseline assumes a 
+four-person team working concurrently across frontend, backend, design, and project management 
+responsibilities. 
+ 
+5.1  Work Breakdown Structure 
+The TravelMind WBS decomposes the full project scope into 57 discrete work packages organised across 
+nine delivery phases. Each package is assigned a unique code, an owner role, and a developer -day effort 
+estimate. Total estimated project effort: 61 developer-days. 
+ 
+WBS 
+Code Work Package Owner Est. Days 
+1.0 Project Initialisation All — 
+1.1 Repository setup (GitHub, branching strategy, CI config) Tech Lead 0.5 
+1.2 Development environment configuration (Node.js, ESLint, 
+Prettier) 
+Tech Lead 0.5 
+1.3 Project management tooling setup (Jira/GitHub Projects, 
+WBS baseline) 
+PM 0.5 
+2.0 Requirements Engineering All — 
+2.1 Stakeholder interviews and user persona definition PM + UX 1.0 
+2.2 User Story mapping (US01-US37) and MoSCoW 
+prioritisation 
+PM 1.5 
+2.3 Functional Requirements specification (RF-WIZ, RF-AI, RF-
+VIS, RF-STO) 
+PM + Tech Lead 2.0 
+2.4 Non-Functional Requirements specification (NFR01-NFR25) PM 1.0 
+2.5 Use Case modelling (UCD + UC narratives) PM + UX 1.5 
+3.0 UI/UX Design UX — 
+3.1 Design system definition (tokens, typography, colour palette) UX 1.0 
+3.2 Wireframes: Landing page + fast-path button flow UX 1.5 
+3.3 Wireframes: Loading screen + Results screen (List + Map) UX 1.5 
+3.4 Wireframes: My Trips screen + PDF export layout UX 1.0 
+3.5 Design review and UAT prototype preparation UX + PM 1.0 
+4.0 Frontend Development Frontend Dev — 
+4.1 Project scaffold (React/Vite + routing + CSS variables) Frontend Dev 1.0 
+4.2 Landing page: button cluster, trip brief row, Surprise Me CTA Frontend Dev 2.0 
+
+--- PAGE 52 ---
+WBS 
+Code Work Package Owner Est. Days 
+4.3 Bottom sheets: Mood, Duration, Radius selectors with 
+animations 
+Frontend Dev 3.0 
+4.4 Long-press extended options panels (UIR-06, RF-WIZ13) Frontend Dev 2.0 
+4.5 Loading screen: compass animation, rotating messages, chip 
+row 
+Frontend Dev 1.0 
+4.6 Results screen: destination header, view toggle tab bar Frontend Dev 1.5 
+4.7 Results screen: List View (day cards, stop cards, travel 
+notes) 
+Frontend Dev 3.0 
+4.8 Results screen: Leaflet.js Map View (markers, polyline, 
+controls) 
+Frontend Dev 4.0 
+4.9 Stop detail bottom sheet (marker tap interaction) Frontend Dev 2.0 
+4.10 My Trips screen (history list, swipe-delete, empty state, 
+search) 
+Frontend Dev 2.0 
+4.11 PDF export (jsPDF integration, layout, static map) Frontend Dev 3.0 
+4.12 Shareable link (Base64 encoding, Clipboard API, toast) Frontend Dev 1.0 
+4.13 Global responsiveness pass (360-1440 px breakpoints) Frontend Dev 2.0 
+4.14 Accessibility pass (WCAG 2.1 AA, aria-labels, keyboard nav) Frontend Dev 1.0 
+5.0 Backend / AI Wrapper Development Backend Dev — 
+5.1 Express server scaffold (routes, middleware, env config) Backend Dev 1.0 
+5.2 API key management and proxy architecture (NFR15) Backend Dev 0.5 
+5.3 Prompt construction module — promptBuilder.js (RF-AI01) Backend Dev 3.0 
+5.4 Destination suggestion endpoint (RF-AI02) Backend Dev 2.0 
+5.5 Full itinerary generation endpoint (RF-AI04-05) Backend Dev 4.0 
+5.6 Single stop regeneration endpoint (RF-AI07) Backend Dev 2.0 
+5.7 JSON schema validation and malformed response handling Backend Dev 2.0 
+5.8 Geolocation fallback logic (RF-ERR02) Backend Dev 1.0 
+5.9 Input sanitisation and prompt injection defence (NFR16) Backend Dev 1.0 
+6.0 Integration All — 
+6.1 Frontend-backend API integration (wizard > loading > results 
+flow) 
+Frontend + 
+Backend 
+2.0 
+6.2 Unsplash API integration + fallback placeholder (RF-VIS04, 
+NFR11) 
+Frontend Dev 1.0 
+6.3 localStorage persistence layer (RF-STO01-04, NFR10) Frontend Dev 2.0 
+6.4 End-to-end fast-path smoke test (Mood > itinerary in < 60 s) All 1.0 
+7.0 Testing & QA PM + All — 
+7.1 Unit tests: promptBuilder.js and JSON schema validator Backend Dev 1.5 
+
+--- PAGE 53 ---
+WBS 
+Code Work Package Owner Est. Days 
+7.2 API error handling validation (timeout, malformed JSON, 5xx) Backend Dev 1.0 
+7.3 Responsive design testing (360/768/1024/1440 px) Frontend Dev 1.0 
+7.4 User Acceptance Testing — 5 representative users (NFR05, 
+NFR22) 
+PM + UX 2.0 
+7.5 Cross-browser testing (Chrome, Firefox, Safari desktop + 
+mobile) 
+Frontend Dev 1.0 
+8.0 Deployment Tech Lead — 
+8.1 Frontend deployment to Vercel (static build, env vars) Tech Lead 0.5 
+8.2 Backend deployment to Railway/Render (Node.js, env 
+config) 
+Tech Lead 0.5 
+9.0 Documentation & Submission PM — 
+9.1 Requirement Analysis Report — final review and formatting PM 1.5 
+9.2 README and API documentation Tech Lead 1.0 
+9.3 Demo preparation and UAT report compilation PM + UX 1.0 
+ 
+  WBS Summary 
+9 delivery phases | 57 work packages | Total effort: 61 developer-days. Highest-effort phases: Frontend 
+Development (27.5 dev-days) and Backend/AI Wrapper (16.5 dev-days). Backend prompt engineering 
+module (5.3) and full itinerary endpoint (5.5) represent the highest single-package risk at 3 and 4 days 
+respectively. 
+ 
+  
+
+--- PAGE 54 ---
+5.2 Critical Path 
+The critical path represents the longest sequence of dependent tasks that determines the minimum project duration. 
+ 
+Identified Critical Path 
+• Requirements Analysis  
+• System Design  
+• Frontend Input Module (Fast-Path) 
+• Backend AI Integration 
+• API Integration (Frontend ↔ Backend) 
+• Itinerary Generation 
+• Results Screen Rendering 
+• Testing (Core Features) 
+• Deployment 
+ 
+The AI Integration, Frontend Input, and Integration layers are tightly dependent.  The system cannot function without 
+the AI pipeline, making backend work critical. Testing and deployment depend on all prior components.  
+ 
+ 
+Estimated Duration 
+ 
+Task Duration (Days) 
+Requirements & Design 2 
+Input Module 5 
+Backend AI Integration 6 
+Integration 3 
+Results Module 4 
+Testing 4 
+Deployment 1 
+Total (Critical Path) 25 Days 
+ 
+ 
+5.3 Slack Time of Non-Critical Activities 
+Slack (float) is the amount of time a task can be delayed without affecting the overall project timeline. 
+ 
+Non-Critical Tasks and Slack 
+Task Duration Dependency Slack 
+Surprise Me Mode 2 days After Input Module 3 days 
+PDF Export 3 days After Results Module 4 days 
+Share Link Feature 2 days After Persistence 5 days 
+Trip History UI 2 days After localStorage 3 days 
+Map Enhancements (Styling) 2 days After Map View 2 days 
+ 
+ 
+
+--- PAGE 55 ---
+ 5.4 Cost-Benefit Estimate 
+This section evaluates whether the TravelMind project is worth the development effort. 
+ 
+Estimated Costs 
+Cost Category Estimate 
+Development Time (25 days × 4 members × 6 hrs/day) 600 hours 
+Hourly Rate (student estimate) $10/hour 
+Total Development Cost $6,000 
+ 
+Estimated Benefits 
+TravelMind delivers substantial benefits in both efficiency and user experience by fundamentally transforming the travel 
+planning process. Traditionally, planning a trip requires approximately 4 to 6 hours of research, comparison, and 
+coordination across multiple pl atforms. In contrast, TravelMind reduces this process to under 5 minutes by automating 
+destination discovery and itinerary generation through AI. This represents an estimated time reduction of around 95–98%, 
+effectively eliminating one of the most time -consuming aspects of travel preparation. Beyond time savings, the system 
+significantly enhances user value by reducing decision fatigue caused by excessive choices and fragmented information 
+sources. By interpreting user preferences and generating personalise d itineraries, TravelMind ensures that 
+recommendations are better aligned with individual needs and travel styles. As a result, users can make quicker, more 
+confident decisions and are more likely to experience higher satisfaction with their trips, as the planning process becomes 
+both simpler and more tailored to their expectations.  
+ 
+Cost vs Benefit Summary 
+ 
+Metric Value 
+Total Cost ~$6,000 
+User Time Saved 4–6 hours per trip 
+Efficiency Gain ~98% 
+ 
+  
+
+--- PAGE 56 ---
+6. Conclusion 
+In conclusion, the requirement analysis for TravelMind establishes a clear and comprehensive foundation for the 
+development of an AI -powered travel planning system. By identifying the core problem of information overload and 
+decision fatigue, the report justifies the need for a more intuitive, user-centric solution. The defined user stories, functional 
+and non-functional requirements, and system models ensure that both user needs and technical constraints are thoroughly 
+addressed. Furthermore, the analysis demonstrates strong alignment between the system’s design and its primary objective 
+of reducing planning time while improving personalisation and usability. Overall, this requirements specification provides 
+a structured roadmap that supports efficient deve lopment, effective project management, and successful delivery of the 
+TravelMind MVP. 
+ 
+
