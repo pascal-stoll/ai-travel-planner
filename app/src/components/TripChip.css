@@ -1,0 +1,10 @@
+.trip-chip {
+  display: inline-block;
+  font-family: var(--font-family-primary);
+  font-size: 13px;
+  font-weight: 500;
+  color: #FFFFFF;
+  padding: 2px var(--space-lg);
+  border-radius: var(--radius-xl);
+  white-space: nowrap;
+}

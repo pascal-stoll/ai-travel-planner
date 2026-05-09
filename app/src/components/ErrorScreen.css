@@ -1,0 +1,85 @@
+.error-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--color-white);
+  padding: var(--space-3xl);
+  text-align: center;
+  font-family: var(--font-family-primary);
+}
+
+.error-screen__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3xl);
+  width: 100%;
+  max-width: 400px;
+}
+
+.error-screen__icon {
+  width: 48px;
+  height: 48px;
+  color: #F47B20;
+}
+
+.error-screen__title {
+  font-family: var(--font-family-primary);
+  font-size: 18px;
+  font-weight: 600;
+  color: #1E2D3D;
+  margin: 0;
+}
+
+.error-screen__message {
+  font-family: var(--font-family-primary);
+  font-size: 14px;
+  color: #4B5563;
+  margin: 0;
+  line-height: 1.5;
+  max-width: 280px;
+}
+
+.error-screen__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  width: 100%;
+  margin-top: var(--space-lg);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl) var(--space-3xl);
+  border-radius: var(--radius-md);
+  font-family: var(--font-family-primary);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+  border: none;
+  width: 100%;
+}
+
+.btn--primary {
+  background-color: #1A6B8A;
+  color: #FFFFFF;
+}
+
+.btn--primary:hover {
+  background-color: #0F5268;
+}
+
+.btn--ghost {
+  background-color: transparent;
+  color: #1A6B8A;
+  border: 1.5px solid #1A6B8A;
+}
+
+.btn--ghost:hover {
+  background-color: rgba(26,107,138,0.05);
+}
