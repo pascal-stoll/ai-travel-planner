@@ -15,10 +15,122 @@ function LandingPage() {
   const [suggestions, setSuggestions] = useState([]);
   const [toast, setToast] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [geolocationState, setGeolocationState] = useState({
+    loading: false,
+    city: null,
+    error: null,
+    showFallback: false
+  });
   const navigate = useNavigate();
 
   const updateWizard = (changes) => {
     setWizardState((prev) => ({ ...prev, ...changes }));
+  };
+
+  // Geolocation functions
+  const reverseGeocode = async (lat, lng) => {
+    try {
+      // Using Nominatim API for reverse geocoding (free, no API key required)
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`
+      );
+      const data = await response.json();
+      
+      // Extract city name from the response
+      const city = data.address?.city || 
+                   data.address?.town || 
+                   data.address?.village || 
+                   data.address?.municipality ||
+                   `${data.address?.state || 'Unknown Location'}`;
+      
+      return city;
+    } catch (error) {
+      console.warn('Reverse geocoding failed:', error);
+      return 'Unknown Location';
+    }
+  };
+
+  const detectLocation = async () => {
+    if (!navigator.geolocation) {
+      setGeolocationState({
+        loading: false,
+        city: null,
+        error: 'Geolocation not supported',
+        showFallback: true
+      });
+      return;
+    }
+
+    setGeolocationState(prev => ({ ...prev, loading: true, error: null }));
+
+    const timeoutId = setTimeout(() => {
+      setGeolocationState({
+        loading: false,
+        city: null,
+        error: 'Location detection timed out',
+        showFallback: true
+      });
+    }, 10000); // 10 second timeout
+
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 300000 // 5 minutes
+        });
+      });
+
+      clearTimeout(timeoutId);
+      
+      const { latitude, longitude } = position.coords;
+      const city = await reverseGeocode(latitude, longitude);
+      
+      setGeolocationState({
+        loading: false,
+        city,
+        error: null,
+        showFallback: false
+      });
+
+      // Update wizard state with coordinates
+      updateWizard({
+        location: {
+          label: city,
+          coords: [latitude, longitude]
+        }
+      });
+
+    } catch (error) {
+      clearTimeout(timeoutId);
+      
+      let errorMessage = 'Location access denied';
+      let showFallback = true;
+
+      if (error.code === error.PERMISSION_DENIED) {
+        errorMessage = 'Location permission denied';
+      } else if (error.code === error.POSITION_UNAVAILABLE) {
+        errorMessage = 'Location unavailable';
+      } else if (error.code === error.TIMEOUT) {
+        errorMessage = 'Location detection timed out';
+      }
+
+      setGeolocationState({
+        loading: false,
+        city: null,
+        error: errorMessage,
+        showFallback
+      });
+    }
+  };
+
+  const resetGeolocation = () => {
+    setGeolocationState({
+      loading: false,
+      city: null,
+      error: null,
+      showFallback: false
+    });
   };
 
   // Long-press detection
@@ -65,6 +177,14 @@ function LandingPage() {
     if (!extendedMode) {
       setSheetMode(type);
       setExtendedMode(false);
+      
+      // Reset geolocation state when opening non-radius sheets
+      if (type !== 'radius') {
+        resetGeolocation();
+      } else {
+        // Trigger geolocation when opening radius sheet
+        detectLocation();
+      }
     }
   };
 
@@ -224,9 +344,24 @@ function LandingPage() {
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-3">Custom Distance & Budget</h3>
-              <p className="text-sm text-slate-600 mb-4">Set custom distance limits and budget preferences.</p>
+              <h3 className="text-lg font-semibold text-slate-900 mb-3">Custom Distance & Location</h3>
+              <p className="text-sm text-slate-600 mb-4">Set custom distance limits and specify your starting location.</p>
               <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Starting City</label>
+                  <input 
+                    type="text" 
+                    placeholder="Enter city name..."
+                    value={wizardState.location?.label || ''} 
+                    onChange={(e) => updateWizard({
+                      location: {
+                        label: e.target.value,
+                        coords: null
+                      }
+                    })}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Custom Distance (km)</label>
                   <input 
@@ -465,6 +600,7 @@ function LandingPage() {
         onClose={() => {
           setSheetMode(null);
           setExtendedMode(false);
+          resetGeolocation();
         }}
         showExtended={extendedMode}
         extendedContent={getExtendedContent()}
@@ -541,9 +677,49 @@ function LandingPage() {
 
         {sheetMode === 'radius' && (
           <div className="space-y-4">
-            <div className="text-center text-sm text-slate-600">
-              Starting from: <span className="font-medium text-slate-900">Your location</span>
+            {/* Location Status */}
+            <div className="text-center">
+              {geolocationState.loading && (
+                <div className="flex items-center justify-center space-x-2 text-sm text-slate-600">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-slate-300 border-t-slate-600"></div>
+                  <span>Detecting your location...</span>
+                </div>
+              )}
+              
+              {geolocationState.city && (
+                <div className="text-sm text-slate-600">
+                  📍 Starting from: <span className="font-medium text-slate-900">{geolocationState.city}</span>
+                </div>
+              )}
+              
+              {geolocationState.showFallback && (
+                <div className="space-y-2">
+                  <div className="text-sm text-slate-600">
+                    📍 Starting from:
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Enter your city..."
+                    value={wizardState.location?.label || ''}
+                    onChange={(e) => updateWizard({
+                      location: {
+                        label: e.target.value,
+                        coords: null
+                      }
+                    })}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
+                  />
+                </div>
+              )}
+              
+              {geolocationState.error && !geolocationState.showFallback && (
+                <div className="text-sm text-amber-600">
+                  ⚠️ {geolocationState.error}
+                </div>
+              )}
             </div>
+            
+            {/* Distance Presets */}
             <div className="grid gap-3">
               {radiusOptions.map((option) => (
                 <button
