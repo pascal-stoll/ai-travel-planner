@@ -3,11 +3,22 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
+const {
+  validateDestinationResponse,
+  validateItineraryResponse,
+  validateStopRegenResponse,
+  isMalformedResponse,
+  extractJsonFromMalformed
+} = require('./schemaValidator');
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Constants for retry and error handling
+const MAX_RETRIES = 1;
+const RETRY_DELAY_MS = 1000;
 
 // Middleware
 app.use(cors({
@@ -16,12 +27,13 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '10mb' }));
 
-// Shared API response format
-const createApiResponse = (success, data = null, error = null, message = null) => ({
+// Shared API response format with enhanced error context
+const createApiResponse = (success, data = null, error = null, message = null, errorContext = null) => ({
   success,
   data,
   error,
   message,
+  ...(errorContext && { errorContext }),
   timestamp: new Date().toISOString(),
   requestId: uuidv4()
 });
@@ -42,8 +54,8 @@ const validateApiKey = () => {
   }
 };
 
-// AI API call helper
-const callDeepSeekAPI = async (prompt) => {
+// AI API call helper with retry logic for malformed responses
+const callDeepSeekAPI = async (prompt, retryCount = 0) => {
   validateApiKey();
 
   try {
@@ -60,10 +72,55 @@ const callDeepSeekAPI = async (prompt) => {
       timeout: DEEPSEEK_CONFIG.timeout
     });
 
+    const content = response.data.choices[0].message.content;
+
+    // Check for malformed response and attempt extraction
+    if (isMalformedResponse(content)) {
+      console.warn(`Malformed response detected. Attempt extraction (retry: ${retryCount}/${MAX_RETRIES})`);
+      const extracted = extractJsonFromMalformed(content);
+      
+      if (extracted) {
+        // Extraction succeeded, return as if normal response
+        return {
+          ...response.data,
+          choices: [{
+            ...response.data.choices[0],
+            message: {
+              ...response.data.choices[0].message,
+              content: JSON.stringify(extracted)
+            }
+          }]
+        };
+      }
+
+      // Extraction failed, retry if allowed
+      if (retryCount < MAX_RETRIES) {
+        console.log(`Retrying DeepSeek API (attempt ${retryCount + 1}/${MAX_RETRIES})...`);
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+        return callDeepSeekAPI(prompt, retryCount + 1);
+      }
+
+      // Out of retries, throw error
+      const error = new Error('MALFORMED_RESPONSE_FINAL');
+      error.originalContent = content;
+      throw error;
+    }
+
     return response.data;
   } catch (error) {
     console.error('DeepSeek API Error:', error.message);
-    throw error;
+
+    // Re-throw with proper error context
+    if (error.message === 'MALFORMED_RESPONSE_FINAL') {
+      throw error;
+    }
+
+    throw {
+      message: error.message,
+      code: error.code,
+      status: error.response?.status,
+      originalError: error
+    };
   }
 };
 
@@ -247,7 +304,12 @@ app.post('/api/generate-itinerary', async (req, res) => {
     const { destination, preferences } = req.body;
 
     if (!destination || !preferences) {
-      return res.status(400).json(createApiResponse(false, null, 'INVALID_REQUEST', 'Destination and preferences are required'));
+      return res.status(400).json(createApiResponse(
+        false, 
+        null, 
+        'INVALID_REQUEST', 
+        'Destination and preferences are required'
+      ));
     }
 
     const prompt = constructItineraryPrompt({ destination, ...preferences });
@@ -259,25 +321,79 @@ app.post('/api/generate-itinerary', async (req, res) => {
       const content = aiResponse.choices[0].message.content;
       itineraryData = JSON.parse(content);
 
-      // Basic validation
-      if (!itineraryData.destination || !itineraryData.days || !Array.isArray(itineraryData.days)) {
-        throw new Error('Invalid itinerary structure');
+      // Schema validation
+      const validation = validateItineraryResponse(itineraryData);
+      if (!validation.valid) {
+        console.error('Itinerary schema validation failed:', validation.errors);
+        return res.status(422).json(createApiResponse(
+          false, 
+          null, 
+          'SCHEMA_VALIDATION_FAILED', 
+          'Generated itinerary does not match expected schema',
+          { validationErrors: validation.errors }
+        ));
       }
     } catch (parseError) {
       console.error('JSON parsing error:', parseError);
-      return res.status(500).json(createApiResponse(false, null, 'AI_RESPONSE_INVALID', 'AI returned invalid response format'));
+      return res.status(400).json(createApiResponse(
+        false, 
+        null, 
+        'AI_RESPONSE_INVALID', 
+        'AI returned invalid JSON format',
+        { parseError: parseError.message }
+      ));
     }
 
-    res.json(createApiResponse(true, itineraryData, null, 'Itinerary generated successfully'));
+    res.json(createApiResponse(
+      true, 
+      itineraryData, 
+      null, 
+      'Itinerary generated successfully'
+    ));
 
   } catch (error) {
     console.error('Generate Itinerary Error:', error);
 
-    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
-      return res.status(504).json(createApiResponse(false, null, 'TIMEOUT', 'Request timed out. Please try again.'));
+    // Timeout handling
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+      return res.status(504).json(createApiResponse(
+        false, 
+        null, 
+        'TIMEOUT', 
+        'Request timed out. Please try again.'
+      ));
     }
 
-    res.status(500).json(createApiResponse(false, null, 'GENERATION_FAILED', 'Failed to generate itinerary. Please try again.'));
+    // Malformed response after retries
+    if (error.message === 'MALFORMED_RESPONSE_FINAL') {
+      return res.status(422).json(createApiResponse(
+        false, 
+        null, 
+        'AI_RESPONSE_MALFORMED', 
+        'AI response was malformed and could not be recovered',
+        { hint: 'The AI may need a different prompt or longer time limit' }
+      ));
+    }
+
+    // DeepSeek API errors
+    if (error.status) {
+      return res.status(502).json(createApiResponse(
+        false, 
+        null, 
+        'DEEPSEEK_API_ERROR', 
+        `DeepSeek API returned status ${error.status}`,
+        { apiStatus: error.status }
+      ));
+    }
+
+    // Generic error
+    res.status(500).json(createApiResponse(
+      false, 
+      null, 
+      'GENERATION_FAILED', 
+      'Failed to generate itinerary. Please try again.',
+      { hint: error.message }
+    ));
   }
 });
 
@@ -287,7 +403,12 @@ app.post('/api/regen-stop', async (req, res) => {
     const { destination, dayIndex, stopIndex, existingStops, preferences } = req.body;
 
     if (!destination || dayIndex === undefined || stopIndex === undefined || !existingStops || !preferences) {
-      return res.status(400).json(createApiResponse(false, null, 'INVALID_REQUEST', 'All parameters are required for stop regeneration'));
+      return res.status(400).json(createApiResponse(
+        false, 
+        null, 
+        'INVALID_REQUEST', 
+        'All parameters are required for stop regeneration'
+      ));
     }
 
     const prompt = constructRegenPrompt({ destination, dayIndex, stopIndex, existingStops, ...preferences });
@@ -299,24 +420,78 @@ app.post('/api/regen-stop', async (req, res) => {
       const content = aiResponse.choices[0].message.content;
       regenData = JSON.parse(content);
 
-      if (!regenData.stop || !regenData.stop.id || !regenData.stop.name) {
-        throw new Error('Invalid stop regeneration structure');
+      // Schema validation
+      const validation = validateStopRegenResponse(regenData);
+      if (!validation.valid) {
+        console.error('Stop regen schema validation failed:', validation.errors);
+        return res.status(422).json(createApiResponse(
+          false, 
+          null, 
+          'SCHEMA_VALIDATION_FAILED', 
+          'Generated stop does not match expected schema',
+          { validationErrors: validation.errors }
+        ));
       }
     } catch (parseError) {
       console.error('JSON parsing error:', parseError);
-      return res.status(500).json(createApiResponse(false, null, 'AI_RESPONSE_INVALID', 'AI returned invalid response format'));
+      return res.status(400).json(createApiResponse(
+        false, 
+        null, 
+        'AI_RESPONSE_INVALID', 
+        'AI returned invalid JSON format',
+        { parseError: parseError.message }
+      ));
     }
 
-    res.json(createApiResponse(true, regenData, null, 'Stop regenerated successfully'));
+    res.json(createApiResponse(
+      true, 
+      regenData, 
+      null, 
+      'Stop regenerated successfully'
+    ));
 
   } catch (error) {
     console.error('Regen Stop Error:', error);
 
-    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
-      return res.status(504).json(createApiResponse(false, null, 'TIMEOUT', 'Request timed out. Please try again.'));
+    // Timeout handling
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+      return res.status(504).json(createApiResponse(
+        false, 
+        null, 
+        'TIMEOUT', 
+        'Request timed out. Please try again.'
+      ));
     }
 
-    res.status(500).json(createApiResponse(false, null, 'REGENERATION_FAILED', 'Failed to regenerate stop. Please try again.'));
+    // Malformed response after retries
+    if (error.message === 'MALFORMED_RESPONSE_FINAL') {
+      return res.status(422).json(createApiResponse(
+        false, 
+        null, 
+        'AI_RESPONSE_MALFORMED', 
+        'AI response was malformed and could not be recovered',
+        { hint: 'Try regenerating the stop again' }
+      ));
+    }
+
+    // DeepSeek API errors
+    if (error.status) {
+      return res.status(502).json(createApiResponse(
+        false, 
+        null, 
+        'DEEPSEEK_API_ERROR', 
+        `DeepSeek API returned status ${error.status}`,
+        { apiStatus: error.status }
+      ));
+    }
+
+    res.status(500).json(createApiResponse(
+      false, 
+      null, 
+      'REGENERATION_FAILED', 
+      'Failed to regenerate stop. Please try again.',
+      { hint: error.message }
+    ));
   }
 });
 
@@ -326,7 +501,12 @@ app.post('/api/suggest-destinations', async (req, res) => {
     const { preferences } = req.body;
 
     if (!preferences) {
-      return res.status(400).json(createApiResponse(false, null, 'INVALID_REQUEST', 'Preferences are required'));
+      return res.status(400).json(createApiResponse(
+        false, 
+        null, 
+        'INVALID_REQUEST', 
+        'Preferences are required'
+      ));
     }
 
     const prompt = constructDestinationPrompt(preferences);
@@ -338,36 +518,101 @@ app.post('/api/suggest-destinations', async (req, res) => {
       const content = aiResponse.choices[0].message.content;
       suggestionsData = JSON.parse(content);
 
-      if (!suggestionsData.destinations || !Array.isArray(suggestionsData.destinations)) {
-        throw new Error('Invalid suggestions structure');
+      // Schema validation
+      const validation = validateDestinationResponse(suggestionsData);
+      if (!validation.valid) {
+        console.error('Destination schema validation failed:', validation.errors);
+        return res.status(422).json(createApiResponse(
+          false, 
+          null, 
+          'SCHEMA_VALIDATION_FAILED', 
+          'Generated destinations do not match expected schema',
+          { validationErrors: validation.errors }
+        ));
       }
     } catch (parseError) {
       console.error('JSON parsing error:', parseError);
-      return res.status(500).json(createApiResponse(false, null, 'AI_RESPONSE_INVALID', 'AI returned invalid response format'));
+      return res.status(400).json(createApiResponse(
+        false, 
+        null, 
+        'AI_RESPONSE_INVALID', 
+        'AI returned invalid JSON format',
+        { parseError: parseError.message }
+      ));
     }
 
-    res.json(createApiResponse(true, suggestionsData, null, 'Destination suggestions generated successfully'));
+    res.json(createApiResponse(
+      true, 
+      suggestionsData, 
+      null, 
+      'Destination suggestions generated successfully'
+    ));
 
   } catch (error) {
     console.error('Suggest Destinations Error:', error);
 
-    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
-      return res.status(504).json(createApiResponse(false, null, 'TIMEOUT', 'Request timed out. Please try again.'));
+    // Timeout handling
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+      return res.status(504).json(createApiResponse(
+        false, 
+        null, 
+        'TIMEOUT', 
+        'Request timed out. Please try again.'
+      ));
     }
 
-    res.status(500).json(createApiResponse(false, null, 'SUGGESTION_FAILED', 'Failed to generate destination suggestions. Please try again.'));
+    // Malformed response after retries
+    if (error.message === 'MALFORMED_RESPONSE_FINAL') {
+      return res.status(422).json(createApiResponse(
+        false, 
+        null, 
+        'AI_RESPONSE_MALFORMED', 
+        'AI response was malformed and could not be recovered',
+        { hint: 'Try submitting different preferences' }
+      ));
+    }
+
+    // DeepSeek API errors
+    if (error.status) {
+      return res.status(502).json(createApiResponse(
+        false, 
+        null, 
+        'DEEPSEEK_API_ERROR', 
+        `DeepSeek API returned status ${error.status}`,
+        { apiStatus: error.status }
+      ));
+    }
+
+    res.status(500).json(createApiResponse(
+      false, 
+      null, 
+      'SUGGESTION_FAILED', 
+      'Failed to generate destination suggestions. Please try again.',
+      { hint: error.message }
+    ));
   }
 });
 
-// Error handling middleware
+// Error handling middleware with structured responses
 app.use((error, req, res, next) => {
   console.error('Unhandled error:', error);
-  res.status(500).json(createApiResponse(false, null, 'INTERNAL_ERROR', 'An unexpected error occurred'));
+  res.status(500).json(createApiResponse(
+    false, 
+    null, 
+    'INTERNAL_ERROR', 
+    'An unexpected error occurred',
+    { type: error.constructor.name, hint: process.env.NODE_ENV === 'development' ? error.message : undefined }
+  ));
 });
 
-// 404 handler
+// 404 handler with structured response
 app.use((req, res) => {
-  res.status(404).json(createApiResponse(false, null, 'NOT_FOUND', 'Endpoint not found'));
+  res.status(404).json(createApiResponse(
+    false, 
+    null, 
+    'NOT_FOUND', 
+    `Endpoint ${req.method} ${req.path} not found`
+  ));
 });
 
 app.listen(PORT, () => {
