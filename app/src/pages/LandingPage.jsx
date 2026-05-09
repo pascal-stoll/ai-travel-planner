@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTravel } from '../context/TravelContext.jsx';
 import { BottomSheet } from '../components/BottomSheet.jsx';
@@ -11,6 +11,7 @@ import { durationOptions, moodOptions, radiusOptions } from '../utils/constants.
 function LandingPage() {
   const { wizardState, setWizardState, saveTrip } = useTravel();
   const [sheetMode, setSheetMode] = useState(null);
+  const [extendedMode, setExtendedMode] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [toast, setToast] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -18,6 +19,53 @@ function LandingPage() {
 
   const updateWizard = (changes) => {
     setWizardState((prev) => ({ ...prev, ...changes }));
+  };
+
+  // Long-press detection
+  const longPressTimers = useRef({});
+  const LONG_PRESS_DURATION = 500; // 500ms as per RF-WIZ13
+
+  const handleButtonMouseDown = (type) => {
+    longPressTimers.current[type] = setTimeout(() => {
+      setSheetMode(type);
+      setExtendedMode(true);
+    }, LONG_PRESS_DURATION);
+  };
+
+  const handleButtonMouseUp = (type) => {
+    if (longPressTimers.current[type]) {
+      clearTimeout(longPressTimers.current[type]);
+      delete longPressTimers.current[type];
+    }
+  };
+
+  const handleButtonMouseLeave = (type) => {
+    if (longPressTimers.current[type]) {
+      clearTimeout(longPressTimers.current[type]);
+      delete longPressTimers.current[type];
+    }
+  };
+
+  const handleButtonTouchStart = (type) => {
+    longPressTimers.current[type] = setTimeout(() => {
+      setSheetMode(type);
+      setExtendedMode(true);
+    }, LONG_PRESS_DURATION);
+  };
+
+  const handleButtonTouchEnd = (type) => {
+    if (longPressTimers.current[type]) {
+      clearTimeout(longPressTimers.current[type]);
+      delete longPressTimers.current[type];
+    }
+  };
+
+  const handleButtonClick = (type) => {
+    // Only handle click if not in long-press mode
+    if (!extendedMode) {
+      setSheetMode(type);
+      setExtendedMode(false);
+    }
   };
 
   const handleSurprise = () => {
@@ -33,29 +81,35 @@ function LandingPage() {
 
   const handleMoodSelect = (selectedMoods) => {
     updateWizard({ mood: selectedMoods });
-    setSheetMode(null);
-    // Small delay for confirmation animation
-    setTimeout(() => {
-      // Mood selection complete, duration button becomes dominant
-    }, 300);
+    if (!extendedMode) {
+      setSheetMode(null);
+      // Small delay for confirmation animation
+      setTimeout(() => {
+        // Mood selection complete, duration button becomes dominant
+      }, 300);
+    }
   };
 
   const handleDurationSelect = (duration) => {
     updateWizard({ duration });
-    setSheetMode(null);
-    // Small delay for confirmation animation
-    setTimeout(() => {
-      // Duration selection complete, radius button becomes dominant
-    }, 300);
+    if (!extendedMode) {
+      setSheetMode(null);
+      // Small delay for confirmation animation
+      setTimeout(() => {
+        // Duration selection complete, radius button becomes dominant
+      }, 300);
+    }
   };
 
   const handleRadiusSelect = (radius) => {
     updateWizard({ radius });
-    setSheetMode(null);
-    // Auto-trigger generation after all three selections
-    setTimeout(() => {
-      handleAutoGenerate();
-    }, 300);
+    if (!extendedMode) {
+      setSheetMode(null);
+      // Auto-trigger generation after all three selections
+      setTimeout(() => {
+        handleAutoGenerate();
+      }, 300);
+    }
   };
 
   const handleAutoGenerate = async () => {
@@ -96,6 +150,117 @@ function LandingPage() {
     navigate('/results');
   };
 
+  const getExtendedContent = () => {
+    switch (sheetMode) {
+      case 'mood':
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-3">Mood Priority Weighting</h3>
+              <p className="text-sm text-slate-600 mb-4">Select primary and secondary moods for more precise recommendations.</p>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Primary Mood</label>
+                  <select 
+                    value={wizardState.primaryMood || wizardState.mood[0] || ''} 
+                    onChange={(e) => updateWizard({ primaryMood: e.target.value })}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                  >
+                    <option value="">Select primary mood</option>
+                    {moodOptions.map(option => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Secondary Mood</label>
+                  <select 
+                    value={wizardState.secondaryMood || ''} 
+                    onChange={(e) => updateWizard({ secondaryMood: e.target.value })}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                  >
+                    <option value="">Select secondary mood (optional)</option>
+                    {moodOptions.map(option => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      
+      case 'duration':
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-3">Exact Date & Time</h3>
+              <p className="text-sm text-slate-600 mb-4">Specify exact departure date and time for precise scheduling.</p>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Departure Date</label>
+                  <input 
+                    type="date" 
+                    value={wizardState.departureDate || ''} 
+                    onChange={(e) => updateWizard({ departureDate: e.target.value })}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Departure Time</label>
+                  <input 
+                    type="time" 
+                    value={wizardState.departureTime || ''} 
+                    onChange={(e) => updateWizard({ departureTime: e.target.value })}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      
+      case 'radius':
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-3">Custom Distance & Budget</h3>
+              <p className="text-sm text-slate-600 mb-4">Set custom distance limits and budget preferences.</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Custom Distance (km)</label>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    max="500" 
+                    value={wizardState.customRadius || ''} 
+                    onChange={(e) => updateWizard({ customRadius: e.target.value })}
+                    placeholder="Enter distance in km"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Budget Tier</label>
+                  <select 
+                    value={wizardState.budget} 
+                    onChange={(e) => updateWizard({ budget: e.target.value })}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                  >
+                    {['Economy', 'Budget', 'Mid-Range', 'Premium', 'Luxury'].map(tier => (
+                      <option key={tier} value={tier}>{tier}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      
+      default:
+        return null;
+    }
+  };
+
   // Determine which button should be dominant based on selection state
   const getButtonState = () => {
     if (!wizardState.mood.length) {
@@ -122,27 +287,11 @@ function LandingPage() {
         </div>
 
         {/* Trip Brief - Show selected values */}
-        {(wizardState.mood.length > 0 || wizardState.duration || wizardState.radius) && (
-          <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-6">
-            <p className="text-sm font-medium text-slate-500 mb-3">Your selections</p>
-            <div className="flex flex-wrap gap-2">
-              {wizardState.mood.map((mood) => (
-                <span key={mood} className="rounded-full bg-ocean-deep px-3 py-1 text-sm font-medium text-white">
-                  {mood}
-                </span>
-              ))}
-              {wizardState.duration && (
-                <span className="rounded-full bg-forest-trail px-3 py-1 text-sm font-medium text-white">
-                  {wizardState.duration}
-                </span>
-              )}
-              {wizardState.radius && (
-                <span className="rounded-full bg-sunset-gold px-3 py-1 text-sm font-medium text-white">
-                  {wizardState.radius}
-                </span>
-              )}
-            </div>
-          </div>
+        {buttonState.dominant === 'generate' && (
+          <TripBriefChips 
+            wizardState={wizardState} 
+            onChipClick={(type) => setSheetMode(type)} 
+          />
         )}
 
         {/* Three Button Flow */}
@@ -150,7 +299,12 @@ function LandingPage() {
           {/* Mood Button - Always visible, primary when no selections */}
           <button
             type="button"
-            onClick={() => setSheetMode('mood')}
+            onClick={() => handleButtonClick('mood')}
+            onMouseDown={() => handleButtonMouseDown('mood')}
+            onMouseUp={() => handleButtonMouseUp('mood')}
+            onMouseLeave={() => handleButtonMouseLeave('mood')}
+            onTouchStart={() => handleButtonTouchStart('mood')}
+            onTouchEnd={() => handleButtonTouchEnd('mood')}
             className={`rounded-[1.75rem] border p-6 text-left transition-all duration-300 ${
               buttonState.dominant === 'mood'
                 ? 'border-ocean-deep bg-ocean-deep text-white shadow-lg scale-105'
@@ -174,7 +328,12 @@ function LandingPage() {
           {buttonState.showDuration && (
             <button
               type="button"
-              onClick={() => setSheetMode('duration')}
+              onClick={() => handleButtonClick('duration')}
+              onMouseDown={() => handleButtonMouseDown('duration')}
+              onMouseUp={() => handleButtonMouseUp('duration')}
+              onMouseLeave={() => handleButtonMouseLeave('duration')}
+              onTouchStart={() => handleButtonTouchStart('duration')}
+              onTouchEnd={() => handleButtonTouchEnd('duration')}
               className={`rounded-[1.75rem] border p-6 text-left transition-all duration-300 ${
                 buttonState.dominant === 'duration'
                   ? 'border-forest-trail bg-forest-trail text-white shadow-lg scale-105'
@@ -199,7 +358,12 @@ function LandingPage() {
           {buttonState.showRadius && (
             <button
               type="button"
-              onClick={() => setSheetMode('radius')}
+              onClick={() => handleButtonClick('radius')}
+              onMouseDown={() => handleButtonMouseDown('radius')}
+              onMouseUp={() => handleButtonMouseUp('radius')}
+              onMouseLeave={() => handleButtonMouseLeave('radius')}
+              onTouchStart={() => handleButtonTouchStart('radius')}
+              onTouchEnd={() => handleButtonTouchEnd('radius')}
               className={`rounded-[1.75rem] border p-6 text-left transition-all duration-300 ${
                 buttonState.dominant === 'radius'
                   ? 'border-sunset-gold bg-sunset-gold text-white shadow-lg scale-105'
@@ -298,7 +462,12 @@ function LandingPage() {
           'Full travel wizard'
         }
         open={Boolean(sheetMode)}
-        onClose={() => setSheetMode(null)}
+        onClose={() => {
+          setSheetMode(null);
+          setExtendedMode(false);
+        }}
+        showExtended={extendedMode}
+        extendedContent={getExtendedContent()}
       >
         {sheetMode === 'mood' && (
           <div className="grid gap-3 sm:grid-cols-2">
