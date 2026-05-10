@@ -9,7 +9,11 @@ import { durationOptions, moodOptions, radiusOptions } from '../utils/constants.
 
 function LandingPage() {
   const { wizardState, setWizardState, saveTrip } = useTravel();
-  const [sheetMode, setSheetMode] = useState(null);
+  const [sheetMode, setSheetMode] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    const params = new URLSearchParams(window.location.search);
+    return params.get('edit') === 'true' ? 'wizard' : null;
+  });
   const [extendedMode, setExtendedMode] = useState(false);
   const [toast, setToast] = useState('');
   const [generationState, setGenerationState] = useState('idle');
@@ -779,10 +783,11 @@ function LandingPage() {
         )}
 
         {sheetMode === 'wizard' && (
-          <ExtendedWizard onComplete={(data) => {
-            updateWizard(data);
-            setSheetMode(null);
-          }} />
+          <ExtendedWizard
+            wizardState={wizardState}
+            onChange={updateWizard}
+            onSubmit={handleAutoGenerate}
+          />
         )}
       </BottomSheet>
 

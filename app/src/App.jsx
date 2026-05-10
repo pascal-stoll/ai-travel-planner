@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage.jsx';
 import ResultsPage from './pages/ResultsPage.jsx';
 import MyTripsPage from './pages/MyTripsPage.jsx';
+import TripDetailPage from './pages/TripDetailPage.jsx';
 import Navigation from './components/Navigation.jsx';
 import { TravelProvider } from './context/TravelContext.jsx';
 
@@ -17,6 +18,7 @@ function App() {
               <Route path="/" element={<LandingPage />} />
               <Route path="/results" element={<ResultsPage />} />
               <Route path="/trips" element={<MyTripsPage />} />
+              <Route path="/trips/:tripId" element={<TripDetailPage />} />
             </Routes>
           </main>
         </div>
