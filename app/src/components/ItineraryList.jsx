@@ -3,7 +3,7 @@ import { DayCardAccordion } from './DayCardAccordion.jsx';
 import { ItineraryStopCard } from './ItineraryStopCard.jsx';
 import { TravelNote } from './TravelNote.jsx';
 
-export function ItineraryList({ itinerary }) {
+export function ItineraryList({ itinerary, compact = false }) {
   const [openDayId, setOpenDayId] = useState(() => itinerary?.days?.[0]?.id || null);
 
   if (!itinerary?.days?.length) {
@@ -15,7 +15,7 @@ export function ItineraryList({ itinerary }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className={compact ? 'space-y-3' : 'space-y-4'}>
       {itinerary.days.map((day) => {
         const isOpen = openDayId === day.id;
 
@@ -24,13 +24,14 @@ export function ItineraryList({ itinerary }) {
             key={day.id}
             day={day}
             open={isOpen}
+            compact={compact}
             onToggle={() => setOpenDayId((current) => (current === day.id ? null : day.id))}
           >
-            <div className="space-y-4">
+            <div className={compact ? 'space-y-3' : 'space-y-4'}>
               {day.stops.map((stop, index) => (
-                <div key={stop.id} className="space-y-4">
-                  <ItineraryStopCard stop={stop} />
-                  {index < day.stops.length - 1 ? <TravelNote note={stop.travelToNext} /> : null}
+                <div key={stop.id} className={compact ? 'space-y-3' : 'space-y-4'}>
+                  <ItineraryStopCard stop={stop} compact={compact} />
+                  {index < day.stops.length - 1 ? <TravelNote note={stop.travelToNext} compact={compact} /> : null}
                 </div>
               ))}
             </div>

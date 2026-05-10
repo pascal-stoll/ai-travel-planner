@@ -2,45 +2,53 @@ import React from 'react';
 
 export function TripBriefChips({ wizardState, onChipClick }) {
   if (!wizardState || (!wizardState.mood.length && !wizardState.duration && !wizardState.radius)) return null;
-  
-  const getChipColor = (type) => {
-    switch (type) {
-      case 'mood': return 'bg-ocean-deep hover:bg-ocean-deep/90';
-      case 'duration': return 'bg-forest-trail hover:bg-forest-trail/90';
-      case 'radius': return 'bg-sunset-gold hover:bg-sunset-gold/90';
-      default: return 'bg-slate-200 hover:bg-slate-300';
-    }
-  };
+
+  const entries = [
+    {
+      key: 'mood',
+      label: 'Mood',
+      value: wizardState.mood.length ? wizardState.mood.join(' + ') : 'Choose a mood',
+      accent: 'text-ocean-deep',
+      dot: 'bg-ocean-deep',
+    },
+    {
+      key: 'duration',
+      label: 'Duration',
+      value: wizardState.duration || 'Set duration',
+      accent: 'text-forest-trail',
+      dot: 'bg-forest-trail',
+    },
+    {
+      key: 'radius',
+      label: 'Radius',
+      value: wizardState.radius || 'Set radius',
+      accent: 'text-sunset-gold',
+      dot: 'bg-sunset-gold',
+    },
+  ];
 
   return (
-    <div className="mb-6 rounded-[1.75rem] border border-slate-200 bg-slate-50 p-6">
-      <p className="text-sm font-medium text-slate-500 mb-3">Your selections</p>
-      <div className="flex flex-wrap gap-2">
-        {wizardState.mood.map((mood) => (
+    <div className="overflow-hidden rounded-[1.7rem] border border-slate-200/80 bg-white/92 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
+      <div className="px-5 pt-4">
+        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.28em] text-slate-500">Your trip brief</p>
+      </div>
+      <div className="mt-3 grid gap-px bg-slate-200/70 sm:grid-cols-3">
+        {entries.map((entry) => (
           <button
-            key={mood}
-            onClick={() => onChipClick && onChipClick('mood')}
-            className={`rounded-full ${getChipColor('mood')} px-3 py-1 text-sm font-medium text-white transition-colors cursor-pointer`}
+            key={entry.key}
+            type="button"
+            onClick={() => onChipClick && onChipClick(entry.key)}
+            className="flex items-center gap-3 bg-white px-5 py-4 text-left transition-colors hover:bg-slate-50"
           >
-            {mood}
+            <span className={`h-11 w-11 rounded-full ${entry.dot} flex items-center justify-center text-white shadow-[0_10px_20px_rgba(15,23,42,0.12)]`}>
+              {entry.key === 'mood' ? '≋' : entry.key === 'duration' ? '▣' : '⌖'}
+            </span>
+            <span className="min-w-0">
+              <span className="block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">{entry.label}</span>
+              <span className={`mt-1 block truncate text-sm font-semibold ${entry.accent}`}>{entry.value}</span>
+            </span>
           </button>
         ))}
-        {wizardState.duration && (
-          <button
-            onClick={() => onChipClick && onChipClick('duration')}
-            className={`rounded-full ${getChipColor('duration')} px-3 py-1 text-sm font-medium text-white transition-colors cursor-pointer`}
-          >
-            {wizardState.duration}
-          </button>
-        )}
-        {wizardState.radius && (
-          <button
-            onClick={() => onChipClick && onChipClick('radius')}
-            className={`rounded-full ${getChipColor('radius')} px-3 py-1 text-sm font-medium text-white transition-colors cursor-pointer`}
-          >
-            {wizardState.radius}
-          </button>
-        )}
       </div>
     </div>
   );

@@ -2,10 +2,9 @@ import React, { useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-
-const defaultIconUrl = new URL('leaflet/dist/images/marker-icon.png', import.meta.url).href;
-const defaultRetinaIconUrl = new URL('leaflet/dist/images/marker-icon-2x.png', import.meta.url).href;
-const defaultShadowUrl = new URL('leaflet/dist/images/marker-shadow.png', import.meta.url).href;
+import defaultIconUrl from 'leaflet/dist/images/marker-icon.png';
+import defaultRetinaIconUrl from 'leaflet/dist/images/marker-icon-2x.png';
+import defaultShadowUrl from 'leaflet/dist/images/marker-shadow.png';
 
 L.Icon.Default.mergeOptions({
   iconUrl: defaultIconUrl,
@@ -13,13 +12,15 @@ L.Icon.Default.mergeOptions({
   shadowUrl: defaultShadowUrl,
 });
 
-export function MapView({ itinerary }) {
+export function MapView({ itinerary, className = 'h-96' }) {
   const positions = useMemo(
-    () => itinerary?.days.flatMap((day) => day.stops.map((stop) => stop.coords)) ?? [],
+    () => itinerary?.days.flatMap((day) => day.stops.map((stop) => stop.coordinates).filter(Boolean)) ?? [],
     [itinerary],
   );
 
-  if (!itinerary) {
+  const center = itinerary?.center && Array.isArray(itinerary.center) ? itinerary.center : positions[0] || null;
+
+  if (!itinerary || !center) {
     return (
       <div className="rounded-3xl border border-slate-200 bg-slate-50 px-6 py-10 text-center text-slate-500">
         No map available yet.
@@ -29,10 +30,10 @@ export function MapView({ itinerary }) {
 
   return (
     <div className="rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <MapContainer center={itinerary.center} zoom={8} scrollWheelZoom={false} className="h-96 w-full rounded-3xl">
+      <MapContainer center={center} zoom={8} scrollWheelZoom={false} className={`${className} w-full rounded-3xl`}>
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        {itinerary.days.flatMap((day) => day.stops.map((stop) => (
-          <Marker key={stop.id} position={stop.coords}>
+        {itinerary.days.flatMap((day) => day.stops.filter((stop) => Array.isArray(stop.coordinates)).map((stop) => (
+          <Marker key={stop.id} position={stop.coordinates}>
             <Popup>
               <div className="space-y-1">
                 <p className="font-semibold">{stop.name}</p>

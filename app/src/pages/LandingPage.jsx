@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTravel } from '../context/useTravel.js';
 import { BottomSheet } from '../components/BottomSheet.jsx';
 import { TripBriefChips } from '../components/TripBriefChips.jsx';
@@ -9,7 +9,11 @@ import { durationOptions, moodOptions, radiusOptions } from '../utils/constants.
 
 function LandingPage() {
   const { wizardState, setWizardState, saveTrip } = useTravel();
-  const [sheetMode, setSheetMode] = useState(null);
+  const [sheetMode, setSheetMode] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    const params = new URLSearchParams(window.location.search);
+    return params.get('edit') === 'true' ? 'wizard' : null;
+  });
   const [extendedMode, setExtendedMode] = useState(false);
   const [toast, setToast] = useState('');
   const [generationState, setGenerationState] = useState('idle');
@@ -236,10 +240,6 @@ function LandingPage() {
     updateWizard({ radius });
     if (!extendedMode) {
       setSheetMode(null);
-      // Auto-trigger generation after all three selections
-      setTimeout(() => {
-        handleAutoGenerate();
-      }, 300);
     }
   };
 
@@ -406,180 +406,163 @@ function LandingPage() {
   const buttonState = getButtonState();
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-      <header className="mb-10 grid gap-6 rounded-[2rem] bg-white/90 p-10 shadow-card backdrop-blur-xl">
-        <div className="space-y-4">
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-orange-500">AI-powered itinerary builder</p>
-          <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">From mood to map in under a minute.</h1>
-          <p className="max-w-2xl text-lg text-slate-600 sm:text-xl">Choose your vibe, set your tempo, and TravelMind builds a personalised itinerary with map, timeline, and travel logic.</p>
+    <main className="mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden rounded-[2.5rem] border border-white/75 bg-[linear-gradient(180deg,#fffdf8_0%,#f8f3ea_100%)] px-4 pb-12 pt-8 shadow-[0_30px_90px_rgba(15,23,42,0.12)] sm:px-8 lg:px-10">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute left-[-10%] top-16 h-56 w-56 rounded-full bg-ocean-deep/10 blur-3xl" />
+          <div className="absolute right-[-8%] top-10 h-64 w-64 rounded-full bg-sunset-gold/10 blur-3xl" />
+          <div className="absolute inset-x-0 bottom-0 h-72 bg-[radial-gradient(circle_at_bottom,rgba(255,255,255,0.92)_0%,rgba(255,252,247,0.9)_40%,rgba(248,243,234,0)_72%)]" />
+          <div className="absolute inset-x-[-5%] bottom-0 h-52 bg-[linear-gradient(180deg,transparent_0%,rgba(163,195,205,0.12)_14%,rgba(110,150,160,0.18)_100%)] [clip-path:polygon(0_56%,10%_34%,18%_44%,28%_28%,36%_46%,46%_20%,58%_42%,70%_24%,82%_44%,92%_30%,100%_48%,100%_100%,0_100%)]" />
+          <div className="absolute inset-x-[6%] bottom-0 h-48 bg-[linear-gradient(180deg,transparent_0%,rgba(50,94,106,0.16)_26%,rgba(24,64,82,0.26)_100%)] [clip-path:polygon(0_70%,8%_50%,16%_64%,24%_42%,32%_66%,41%_36%,50%_58%,59%_30%,68%_60%,77%_38%,86%_62%,94%_46%,100%_64%,100%_100%,0_100%)]" />
         </div>
 
-        {/* Trip Brief - Show selected values */}
-        {buttonState.dominant === 'generate' && (
-          <TripBriefChips 
-            wizardState={wizardState} 
-            onChipClick={(type) => setSheetMode(type)} 
-          />
-        )}
+        <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.26em] text-slate-500">AI-powered travel planner</p>
+          <h1 className="mt-6 max-w-4xl font-serif text-5xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-6xl lg:text-7xl">
+            Plan less.
+            <br />
+            Experience more.
+          </h1>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600 sm:text-xl">
+            Tell us three things and we&apos;ll craft your perfect trip in under a minute.
+          </p>
 
-        {/* Three Button Flow */}
-        <div className="grid gap-4">
-          {/* Mood Button - Always visible, primary when no selections */}
-          <button
-            type="button"
-            onClick={() => handleButtonClick('mood')}
-            onMouseDown={() => handleButtonMouseDown('mood')}
-            onMouseUp={() => handleButtonMouseUp('mood')}
-            onMouseLeave={() => handleButtonMouseLeave('mood')}
-            onTouchStart={() => handleButtonTouchStart('mood')}
-            onTouchEnd={() => handleButtonTouchEnd('mood')}
-            className={`rounded-[1.75rem] border p-6 text-left transition-all duration-300 ${
-              buttonState.dominant === 'mood'
-                ? 'border-ocean-deep bg-ocean-deep text-white shadow-lg scale-105'
-                : 'border-slate-200 bg-white text-slate-900 hover:border-slate-300 hover:bg-slate-50'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={`text-sm font-semibold ${buttonState.dominant === 'mood' ? 'text-white' : 'text-slate-900'}`}>Mood</p>
-                <p className={`mt-1 text-base ${buttonState.dominant === 'mood' ? 'text-white/90' : 'text-slate-600'}`}>
-                  {wizardState.mood.length ? wizardState.mood.join(', ') : 'Choose your travel style'}
-                </p>
-              </div>
-              <div className={`text-2xl ${buttonState.dominant === 'mood' ? 'text-white' : 'text-slate-400'}`}>
-                {wizardState.mood.length ? '✓' : '🎭'}
-              </div>
+          <div className="mt-10 grid w-full gap-4 sm:grid-cols-3">
+            {[
+              {
+                type: 'mood',
+                label: 'Mood',
+                value: wizardState.mood.length ? wizardState.mood.join(' + ') : 'Mood',
+                prompt: 'How do you want to feel?',
+                icon: '≋',
+                gradient: 'from-[#0e7aa4] to-[#0b5f83]',
+                unlocked: true,
+                selected: wizardState.mood.length > 0,
+              },
+              {
+                type: 'duration',
+                label: 'Duration',
+                value: wizardState.duration || 'Duration',
+                prompt: 'How long do you have?',
+                icon: '▣',
+                gradient: 'from-[#3cb777] to-[#2b9b67]',
+                unlocked: buttonState.showDuration,
+                selected: Boolean(wizardState.duration),
+              },
+              {
+                type: 'radius',
+                label: 'Radius',
+                value: wizardState.radius || 'Radius',
+                prompt: 'How far do you want to go?',
+                icon: '⌖',
+                gradient: 'from-[#ff9424] to-[#ff7c12]',
+                unlocked: buttonState.showRadius,
+                selected: Boolean(wizardState.radius),
+              },
+            ].map((card) => {
+              const active = buttonState.dominant === card.type;
+
+              return (
+                <button
+                  key={card.type}
+                  type="button"
+                  disabled={!card.unlocked}
+                  onClick={() => handleButtonClick(card.type)}
+                  onMouseDown={() => handleButtonMouseDown(card.type)}
+                  onMouseUp={() => handleButtonMouseUp(card.type)}
+                  onMouseLeave={() => handleButtonMouseLeave(card.type)}
+                  onTouchStart={() => handleButtonTouchStart(card.type)}
+                  onTouchEnd={() => handleButtonTouchEnd(card.type)}
+                  className={`group relative flex h-[270px] flex-col items-center overflow-hidden rounded-[2rem] p-6 text-center text-white shadow-[0_22px_40px_rgba(15,23,42,0.18)] transition duration-300 bg-gradient-to-br ${card.gradient} ring-1 ring-white/15 ${
+                    active ? 'scale-[1.02]' : 'hover:-translate-y-1 hover:scale-[1.01]'
+                  } ${card.selected ? 'ring-4 ring-white/28' : ''} ${card.unlocked ? '' : 'cursor-not-allowed opacity-75'}`}
+                >
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.18)_0%,transparent_45%)]" />
+                  <div className="relative z-10 flex h-20 w-20 items-center justify-center rounded-full bg-white/92 text-3xl text-slate-900 shadow-[0_18px_30px_rgba(15,23,42,0.18)]">
+                    {card.icon}
+                  </div>
+
+                  <div className="relative z-10 mt-8 space-y-3">
+                    <div>
+                      <p className="text-2xl font-semibold tracking-[-0.03em]">{card.label}</p>
+                      <p className="mt-3 text-lg font-medium text-white/88">{card.prompt}</p>
+                    </div>
+                  </div>
+
+                  <div className="relative z-10 mt-auto text-4xl font-light text-white/90 transition-transform group-hover:translate-y-0.5">
+                    →
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {(wizardState.mood.length || wizardState.duration || wizardState.radius) ? (
+            <div className="mt-8 w-full max-w-4xl">
+              <TripBriefChips
+                wizardState={wizardState}
+                onChipClick={(type) => setSheetMode(type)}
+              />
             </div>
-          </button>
+          ) : null}
 
-          {/* Duration Button - Visible after mood selection */}
-          {buttonState.showDuration && (
-            <button
-              type="button"
-              onClick={() => handleButtonClick('duration')}
-              onMouseDown={() => handleButtonMouseDown('duration')}
-              onMouseUp={() => handleButtonMouseUp('duration')}
-              onMouseLeave={() => handleButtonMouseLeave('duration')}
-              onTouchStart={() => handleButtonTouchStart('duration')}
-              onTouchEnd={() => handleButtonTouchEnd('duration')}
-              className={`rounded-[1.75rem] border p-6 text-left transition-all duration-300 ${
-                buttonState.dominant === 'duration'
-                  ? 'border-forest-trail bg-forest-trail text-white shadow-lg scale-105'
-                  : 'border-slate-200 bg-white text-slate-900 hover:border-slate-300 hover:bg-slate-50'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={`text-sm font-semibold ${buttonState.dominant === 'duration' ? 'text-white' : 'text-slate-900'}`}>Duration</p>
-                  <p className={`mt-1 text-base ${buttonState.dominant === 'duration' ? 'text-white/90' : 'text-slate-600'}`}>
-                    {wizardState.duration || 'How long is your trip?'}
-                  </p>
-                </div>
-                <div className={`text-2xl ${buttonState.dominant === 'duration' ? 'text-white' : 'text-slate-400'}`}>
-                  {wizardState.duration ? '✓' : '⏱️'}
-                </div>
-              </div>
-            </button>
-          )}
-
-          {/* Radius Button - Visible after duration selection */}
-          {buttonState.showRadius && (
-            <button
-              type="button"
-              onClick={() => handleButtonClick('radius')}
-              onMouseDown={() => handleButtonMouseDown('radius')}
-              onMouseUp={() => handleButtonMouseUp('radius')}
-              onMouseLeave={() => handleButtonMouseLeave('radius')}
-              onTouchStart={() => handleButtonTouchStart('radius')}
-              onTouchEnd={() => handleButtonTouchEnd('radius')}
-              className={`rounded-[1.75rem] border p-6 text-left transition-all duration-300 ${
-                buttonState.dominant === 'radius'
-                  ? 'border-sunset-gold bg-sunset-gold text-white shadow-lg scale-105'
-                  : 'border-slate-200 bg-white text-slate-900 hover:border-slate-300 hover:bg-slate-50'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={`text-sm font-semibold ${buttonState.dominant === 'radius' ? 'text-white' : 'text-slate-900'}`}>Radius</p>
-                  <p className={`mt-1 text-base ${buttonState.dominant === 'radius' ? 'text-white/90' : 'text-slate-600'}`}>
-                    {wizardState.radius || 'How far to travel?'}
-                  </p>
-                </div>
-                <div className={`text-2xl ${buttonState.dominant === 'radius' ? 'text-white' : 'text-slate-400'}`}>
-                  {wizardState.radius ? '✓' : '📍'}
-                </div>
-              </div>
-            </button>
-          )}
-
-          {/* Generate Button - Visible when all selections complete */}
-          {buttonState.dominant === 'generate' && (
+          <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
             <button
               type="button"
               onClick={handleAutoGenerate}
               disabled={isGenerating}
-              className="rounded-[1.75rem] border border-slate-200 bg-slate-950 p-6 text-left text-white transition-all hover:bg-slate-800 disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-3 rounded-full bg-[#0f5d7a] px-8 py-4 text-base font-semibold text-white shadow-[0_16px_32px_rgba(15,93,122,0.28)] transition hover:bg-[#0d5270] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold">Generate Itinerary</p>
-                  <p className="mt-1 text-base text-white/90">
-                    {isGenerating ? 'Creating your perfect trip...' : 'Ready to build your itinerary!'}
-                  </p>
-                </div>
-                <div className="text-2xl">
-                  {isGenerating ? '⏳' : '🚀'}
-                </div>
-              </div>
+              <span className="text-xl">✦</span>
+              {isGenerating ? 'Creating your itinerary...' : 'Generate My Itinerary'}
             </button>
-          )}
-        </div>
+            <button
+              type="button"
+              onClick={handleSurprise}
+              className="inline-flex items-center justify-center gap-3 rounded-full border border-slate-200 bg-white px-8 py-4 text-base font-semibold text-slate-900 shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:border-slate-300 hover:bg-slate-50"
+            >
+              <span className="text-xl">⬡</span>
+              Surprise Me
+            </button>
+          </div>
 
-        {/* Alternative Options */}
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <button type="button" onClick={handleSurprise} className="rounded-full bg-slate-950 px-6 py-4 text-sm font-semibold text-white transition hover:bg-slate-800">
-            Surprise Me
-          </button>
-          <button type="button" onClick={() => setSheetMode('wizard')} className="rounded-full border border-slate-200 bg-white px-6 py-4 text-sm font-semibold text-slate-900 transition hover:border-slate-300">
-            Open full wizard
-          </button>
-          <Link to="/trips" className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-4 text-sm font-semibold text-slate-900 transition hover:border-slate-300">
-            My Trips
-          </Link>
-        </div>
+          <p className="mt-6 text-sm text-slate-500">
+            Long press any option to open the advanced settings.
+          </p>
 
-        {generationState === 'error' && (
-          <div className="rounded-[1.75rem] border border-amber-200 bg-amber-50 p-5">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm font-semibold text-amber-900">Generation failed</p>
-                <p className="mt-1 text-sm text-amber-800">Review your selections above, then try generating again.</p>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={handleAutoGenerate}
-                  className="rounded-full bg-amber-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-800"
-                >
-                  Retry generation
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setGenerationState('idle');
-                    setExtendedMode(false);
-                    resetGeolocation();
-                    setSheetMode('mood');
-                  }}
-                  className="rounded-full border border-amber-200 bg-white px-5 py-3 text-sm font-semibold text-amber-900 transition hover:border-amber-300"
-                >
-                  Edit parameters
-                </button>
+          {generationState === 'error' && (
+            <div className="mt-8 w-full rounded-[1.5rem] border border-amber-200 bg-amber-50 px-5 py-4 text-left">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-amber-900">Generation failed</p>
+                  <p className="mt-1 text-sm text-amber-800">Review your selections above, then try generating again.</p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleAutoGenerate}
+                    className="rounded-full bg-amber-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-800"
+                  >
+                    Retry generation
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGenerationState('idle');
+                      setExtendedMode(false);
+                      resetGeolocation();
+                      setSheetMode('mood');
+                    }}
+                    className="rounded-full border border-amber-200 bg-white px-5 py-3 text-sm font-semibold text-amber-900 transition hover:border-amber-300"
+                  >
+                    Edit parameters
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </header>
+          )}
+        </div>
+      </section>
 
       {/* Loading Screen Overlay */}
       {isGenerating && (
@@ -644,20 +627,26 @@ function LandingPage() {
                 }}
                 className={`rounded-2xl border-2 p-6 text-center transition-all hover:scale-105 ${
                   wizardState.mood.includes(option.value)
-                    ? 'border-ocean-deep bg-ocean-deep text-white shadow-lg'
+                    ? 'border-ocean-deep bg-sky-50 text-slate-950 shadow-[0_16px_30px_rgba(26,107,138,0.12)] ring-2 ring-ocean-deep/15'
                     : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
                 }`}
               >
-                <div className="mb-3 text-3xl">
-                  {option.value === 'Relax' && '🏖️'}
-                  {option.value === 'Adventure' && '🏔️'}
-                  {option.value === 'Culture' && '🏛️'}
-                  {option.value === 'Food' && '🍽️'}
-                  {option.value === 'Nature' && '🌲'}
-                  {option.value === 'Nightlife' && '🌙'}
+                <div className="mb-3 flex items-center justify-between">
+                  <div className={`inline-flex h-11 w-11 items-center justify-center rounded-full text-2xl ${
+                    wizardState.mood.includes(option.value)
+                      ? 'bg-ocean-deep/10 text-ocean-deep'
+                      : 'bg-slate-100 text-slate-700'
+                  }`}>
+                    {option.value === 'Relax' && '🏖️'}
+                    {option.value === 'Adventure' && '🏔️'}
+                    {option.value === 'Culture' && '🏛️'}
+                    {option.value === 'Food' && '🍽️'}
+                    {option.value === 'Nature' && '🌲'}
+                    {option.value === 'Nightlife' && '🌙'}
+                  </div>
                 </div>
                 <p className="font-semibold text-lg">{option.label}</p>
-                <p className={`mt-2 text-sm ${wizardState.mood.includes(option.value) ? 'text-white/90' : 'text-slate-500'}`}>
+                <p className={`mt-2 text-sm ${wizardState.mood.includes(option.value) ? 'text-slate-600' : 'text-slate-500'}`}>
                   {option.description}
                 </p>
               </button>
@@ -674,25 +663,31 @@ function LandingPage() {
                 onClick={() => handleDurationSelect(option.value)}
                 className={`rounded-2xl border-2 p-6 text-left transition-all hover:scale-105 ${
                   wizardState.duration === option.value
-                    ? 'border-forest-trail bg-forest-trail text-white shadow-lg'
+                    ? 'border-forest-trail bg-emerald-50 text-slate-950 shadow-[0_16px_30px_rgba(46,158,107,0.12)] ring-2 ring-forest-trail/15'
                     : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div>
-                    <div className="mb-2 text-2xl">
-                      {option.value === 'A few hours' && '☀️'}
-                      {option.value === '1 Day' && '🌅'}
-                      {option.value === '2–3 Days' && '🏖️'}
-                      {option.value === '1 Week+' && '🗺️'}
+                  <div className="min-w-0">
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <div className={`inline-flex h-11 w-11 items-center justify-center rounded-full text-2xl ${
+                        wizardState.duration === option.value
+                          ? 'bg-forest-trail/10 text-forest-trail'
+                          : 'bg-slate-100 text-slate-700'
+                      }`}>
+                        {option.value === 'A few hours' && '☀️'}
+                        {option.value === '1 Day' && '🌅'}
+                        {option.value === '2–3 Days' && '🏖️'}
+                        {option.value === '1 Week+' && '🗺️'}
+                      </div>
                     </div>
                     <p className="font-semibold text-lg">{option.label}</p>
-                    <p className={`mt-2 text-sm ${wizardState.duration === option.value ? 'text-white/90' : 'text-slate-500'}`}>
+                    <p className={`mt-2 text-sm ${wizardState.duration === option.value ? 'text-slate-600' : 'text-slate-500'}`}>
                       {option.description}
                     </p>
                   </div>
                   {wizardState.duration === option.value && (
-                    <div className="text-2xl">✓</div>
+                    <div className="text-2xl text-forest-trail">✓</div>
                   )}
                 </div>
               </button>
@@ -753,26 +748,32 @@ function LandingPage() {
                   onClick={() => handleRadiusSelect(option.value)}
                   className={`rounded-2xl border-2 p-6 text-left transition-all hover:scale-105 ${
                     wizardState.radius === option.value
-                      ? 'border-sunset-gold bg-sunset-gold text-white shadow-lg'
+                      ? 'border-sunset-gold bg-orange-50 text-slate-950 shadow-[0_16px_30px_rgba(244,123,32,0.12)] ring-2 ring-sunset-gold/15'
                       : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <div>
-                      <div className="mb-2 text-2xl">
-                        {option.value === '< 50 km' && '🏠'}
-                        {option.value === '50–150 km' && '🚗'}
-                        {option.value === '150–300 km' && '✈️'}
-                        {option.value === '300–500 km' && '🚄'}
-                        {option.value === 'Anywhere' && '🌍'}
+                    <div className="min-w-0">
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <div className={`inline-flex h-11 w-11 items-center justify-center rounded-full text-2xl ${
+                          wizardState.radius === option.value
+                            ? 'bg-sunset-gold/10 text-sunset-gold'
+                            : 'bg-slate-100 text-slate-700'
+                        }`}>
+                          {option.value === '< 50 km' && '🏠'}
+                          {option.value === '50–150 km' && '🚗'}
+                          {option.value === '150–300 km' && '✈️'}
+                          {option.value === '300–500 km' && '🚄'}
+                          {option.value === 'Anywhere' && '🌍'}
+                        </div>
                       </div>
                       <p className="font-semibold text-lg">{option.label}</p>
-                      <p className={`mt-2 text-sm ${wizardState.radius === option.value ? 'text-white/90' : 'text-slate-500'}`}>
+                      <p className={`mt-2 text-sm ${wizardState.radius === option.value ? 'text-slate-600' : 'text-slate-500'}`}>
                         {option.description}
                       </p>
                     </div>
                     {wizardState.radius === option.value && (
-                      <div className="text-2xl">✓</div>
+                      <div className="text-2xl text-sunset-gold">✓</div>
                     )}
                   </div>
                 </button>
@@ -782,10 +783,11 @@ function LandingPage() {
         )}
 
         {sheetMode === 'wizard' && (
-          <ExtendedWizard onComplete={(data) => {
-            updateWizard(data);
-            setSheetMode(null);
-          }} />
+          <ExtendedWizard
+            wizardState={wizardState}
+            onChange={updateWizard}
+            onSubmit={handleAutoGenerate}
+          />
         )}
       </BottomSheet>
 
