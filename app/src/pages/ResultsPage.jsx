@@ -1,13 +1,12 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useTravel } from '../context/TravelContext.jsx';
+import { useTravel } from '../context/useTravel.js';
 import { DestinationHeader } from '../components/DestinationHeader.jsx';
 import { ItineraryList } from '../components/ItineraryList.jsx';
-import { MapView } from '../components/MapView.jsx';
 import { Toast } from '../components/Toast.jsx';
 import { exportItineraryToPdf } from '../services/pdf.js';
 import { buildShareLink, parseShareLink } from '../services/share.js';
-import { regenerateStop } from '../services/itinerary.js';
+import { getItineraryDestinationName, normalizeItinerary } from '../features/results/itineraryNormalizer.js';
 
 function ResultsPage() {
   const location = useLocation();
@@ -18,15 +17,29 @@ function ResultsPage() {
     if (!activeItinerary) {
       const shared = parseShareLink(location.search);
       if (shared) {
-        saveTrip(shared);
-        setToast('Shared itinerary loaded successfully.');
+        try {
+          const normalized = normalizeItinerary(shared);
+          if (normalized) {
+            saveTrip(normalized);
+            setTimeout(() => setToast('Shared itinerary loaded successfully.'), 0);
+          }
+        } catch {
+          setTimeout(() => setToast('The shared itinerary could not be opened.'), 0);
+        }
       }
     }
   }, [activeItinerary, location.search, saveTrip]);
 
   useEffect(() => {
     if (activeItinerary) {
-      saveTrip(activeItinerary);
+      try {
+        const normalized = normalizeItinerary(activeItinerary);
+        if (normalized && normalized.id !== activeItinerary.id) {
+          saveTrip(normalized);
+        }
+      } catch {
+        console.warn('The current itinerary could not be normalized.');
+      }
     }
   }, [activeItinerary, saveTrip]);
 
@@ -57,12 +70,6 @@ function ResultsPage() {
     setToast('Your itinerary PDF is downloading.');
   };
 
-  const handleRegenerate = (dayNumber, stopId) => {
-    const updated = regenerateStop(activeItinerary, dayNumber, stopId);
-    saveTrip(updated);
-    setToast('A stop has been refreshed in your plan.');
-  };
-
   const alreadySaved = history.some((item) => item.id === activeItinerary.id);
 
   return (
@@ -70,7 +77,7 @@ function ResultsPage() {
       <div className="mb-8 flex flex-col gap-4 rounded-[2rem] bg-white/90 p-6 shadow-card backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-orange-500">Your itinerary</p>
-          <h1 className="mt-3 text-3xl font-semibold text-slate-950">{activeItinerary.destination}</h1>
+          <h1 className="mt-3 text-3xl font-semibold text-slate-950">{getItineraryDestinationName(activeItinerary)}</h1>
           <p className="mt-2 text-slate-600">{activeItinerary.subtitle}</p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -86,41 +93,40 @@ function ResultsPage() {
         </div>
       </div>
 
-      <DestinationHeader itinerary={activeItinerary} />
+      <DestinationHeader key={activeItinerary.id} itinerary={activeItinerary} />
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="space-y-6">
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="rounded-3xl bg-slate-50 p-5">
-                <p className="text-sm text-slate-500">Duration</p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">{activeItinerary.duration}</p>
-              </div>
-              <div className="rounded-3xl bg-slate-50 p-5">
-                <p className="text-sm text-slate-500">Radius</p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">{activeItinerary.radius}</p>
-              </div>
-              <div className="rounded-3xl bg-slate-50 p-5">
-                <p className="text-sm text-slate-500">Travelers</p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">{activeItinerary.adults} adults, {activeItinerary.children} kids</p>
-              </div>
+      <div className="mt-8 space-y-6">
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="text-sm text-slate-500">Duration</p>
+            <p className="mt-2 text-lg font-semibold text-slate-950">{activeItinerary.duration || 'Flexible'}</p>
+          </div>
+          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="text-sm text-slate-500">Radius</p>
+            <p className="mt-2 text-lg font-semibold text-slate-950">{activeItinerary.radius || 'Flexible'}</p>
+          </div>
+          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="text-sm text-slate-500">Travelers</p>
+            <p className="mt-2 text-lg font-semibold text-slate-950">{activeItinerary.adults} adults, {activeItinerary.children} kids</p>
+          </div>
+          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="text-sm text-slate-500">Mood</p>
+            <p className="mt-2 text-lg font-semibold text-slate-950">{activeItinerary.mood || 'Flexible'}</p>
+          </div>
+        </section>
+
+        <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-slate-950">Itinerary</h2>
+              <p className="mt-2 text-sm text-slate-600">Each day is arranged in chronological order with travel notes between stops.</p>
             </div>
-          </section>
-
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-slate-950">Itinerary</h2>
-            <p className="mt-2 text-sm text-slate-600">Each day is designed for effortless discovery and local rhythm.</p>
-            <ItineraryList itinerary={activeItinerary} onRegenerate={handleRegenerate} />
-          </section>
-        </div>
-
-        <div className="space-y-6">
-          <MapView itinerary={activeItinerary} />
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm text-slate-500">Status</p>
-            <p className="mt-3 text-slate-700">{alreadySaved ? 'This plan is saved in My Trips.' : 'This itinerary will be stored when you leave the page.'}</p>
-          </section>
-        </div>
+            <p className="text-sm text-slate-500">{alreadySaved ? 'Saved in My Trips' : 'Not yet saved'}</p>
+          </div>
+          <div className="mt-6">
+            <ItineraryList key={activeItinerary.id} itinerary={activeItinerary} />
+          </div>
+        </section>
       </div>
 
       {toast ? <Toast message={toast} onClose={() => setToast('')} /> : null}

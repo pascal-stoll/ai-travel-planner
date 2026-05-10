@@ -1,7 +1,7 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { defaultWizardState } from '../utils/constants.js';
-
-const TravelContext = createContext(null);
+import { tryNormalizeItinerary } from '../features/results/itineraryNormalizer.js';
+import { TravelContext } from './travelContext.js';
 
 const STORAGE_KEYS = {
   ACTIVE: 'travelmind-active',
@@ -14,19 +14,18 @@ function readJson(key, fallback) {
   try {
     const raw = window.localStorage.getItem(key);
     if (!raw) return fallback;
-    
+
     const parsed = JSON.parse(raw);
-    
-    // Check TTL for wizard state (24 hours)
+
     if (key === STORAGE_KEYS.WIZARD && parsed.timestamp) {
       const age = Date.now() - parsed.timestamp;
-      const maxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+      const maxAge = 24 * 60 * 60 * 1000;
       if (age > maxAge) {
         window.localStorage.removeItem(key);
         return fallback;
       }
     }
-    
+
     return key === STORAGE_KEYS.WIZARD ? parsed.data : parsed;
   } catch {
     return fallback;
@@ -35,18 +34,21 @@ function readJson(key, fallback) {
 
 function writeJson(key, value) {
   if (typeof window === 'undefined') return;
-  
-  const data = key === STORAGE_KEYS.WIZARD 
+
+  const data = key === STORAGE_KEYS.WIZARD
     ? { data: value, timestamp: Date.now() }
     : value;
-    
+
   window.localStorage.setItem(key, JSON.stringify(data));
 }
 
 export function TravelProvider({ children }) {
   const [wizardState, setWizardState] = useState(() => readJson(STORAGE_KEYS.WIZARD, defaultWizardState));
-  const [activeItinerary, setActiveItinerary] = useState(() => readJson(STORAGE_KEYS.ACTIVE, null));
-  const [history, setHistory] = useState(() => readJson(STORAGE_KEYS.HISTORY, []));
+  const [activeItinerary, setActiveItinerary] = useState(() => tryNormalizeItinerary(readJson(STORAGE_KEYS.ACTIVE, null)) || null);
+  const [history, setHistory] = useState(() => {
+    const stored = readJson(STORAGE_KEYS.HISTORY, []);
+    return Array.isArray(stored) ? stored.map((item) => tryNormalizeItinerary(item)).filter(Boolean) : [];
+  });
 
   useEffect(() => {
     writeJson(STORAGE_KEYS.WIZARD, wizardState);
@@ -60,22 +62,25 @@ export function TravelProvider({ children }) {
     writeJson(STORAGE_KEYS.HISTORY, history);
   }, [history]);
 
-  const saveTrip = (trip) => {
-    setActiveItinerary(trip);
-    setHistory((current) => {
-      if (current.some((item) => item.id === trip.id)) return current;
-      return [trip, ...current].slice(0, 12);
-    });
-  };
+  const saveTrip = useCallback((trip) => {
+    const normalized = tryNormalizeItinerary(trip);
+    if (!normalized) return;
 
-  const loadTrip = (tripId) => {
+    setActiveItinerary(normalized);
+    setHistory((current) => {
+      if (current.some((item) => item.id === normalized.id)) return current;
+      return [normalized, ...current].slice(0, 12);
+    });
+  }, []);
+
+  const loadTrip = useCallback((tripId) => {
     const trip = history.find((item) => item.id === tripId);
     if (trip) {
       setActiveItinerary(trip);
     }
-  };
+  }, [history]);
 
-  const resetWizard = () => setWizardState(defaultWizardState);
+  const resetWizard = useCallback(() => setWizardState(defaultWizardState), []);
 
   const value = useMemo(
     () => ({
@@ -89,16 +94,8 @@ export function TravelProvider({ children }) {
       loadTrip,
       resetWizard,
     }),
-    [wizardState, activeItinerary, history],
+    [wizardState, activeItinerary, history, saveTrip, loadTrip, resetWizard],
   );
 
   return <TravelContext.Provider value={value}>{children}</TravelContext.Provider>;
-}
-
-export function useTravel() {
-  const context = useContext(TravelContext);
-  if (!context) {
-    throw new Error('useTravel must be used within TravelProvider');
-  }
-  return context;
 }

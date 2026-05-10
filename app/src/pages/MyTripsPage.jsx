@@ -1,6 +1,7 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTravel } from '../context/TravelContext.jsx';
-import { TripHistoryCard } from '../components/TripHistoryCard.jsx';
+import { useTravel } from '../context/useTravel.js';
+import { getItineraryDestinationName } from '../features/results/itineraryNormalizer.js';
 
 function MyTripsPage() {
   const { history, loadTrip } = useTravel();
@@ -34,7 +35,7 @@ function MyTripsPage() {
             <article key={trip.id} className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-card backdrop-blur-xl">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-950">{trip.destination}</h2>
+                  <h2 className="text-xl font-semibold text-slate-950">{getItineraryDestinationName(trip)}</h2>
                   <p className="mt-1 text-sm text-slate-600">{new Date(trip.generatedAt).toLocaleDateString()}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">

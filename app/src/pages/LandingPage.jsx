@@ -1,20 +1,20 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useTravel } from '../context/TravelContext.jsx';
+import { useTravel } from '../context/useTravel.js';
 import { BottomSheet } from '../components/BottomSheet.jsx';
-import { SuggestionCard } from '../components/SuggestionCard.jsx';
 import { TripBriefChips } from '../components/TripBriefChips.jsx';
 import { ExtendedWizard } from '../components/ExtendedWizard.jsx';
-import { buildItinerary, chooseDestination, generateSuggestions } from '../services/itinerary.js';
+import { buildItinerary, chooseDestination } from '../services/itinerary.js';
+import { requestGeneratedItinerary } from '../features/results/itineraryApi.js';
+import { normalizeItinerary, parseGeneratedItineraryResponse } from '../features/results/itineraryNormalizer.js';
 import { durationOptions, moodOptions, radiusOptions } from '../utils/constants.js';
 
 function LandingPage() {
   const { wizardState, setWizardState, saveTrip } = useTravel();
   const [sheetMode, setSheetMode] = useState(null);
   const [extendedMode, setExtendedMode] = useState(false);
-  const [suggestions, setSuggestions] = useState([]);
   const [toast, setToast] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationState, setGenerationState] = useState('idle');
   const [geolocationState, setGeolocationState] = useState({
     loading: false,
     city: null,
@@ -22,8 +22,12 @@ function LandingPage() {
     showFallback: false
   });
   const navigate = useNavigate();
+  const isGenerating = generationState === 'loading';
 
   const updateWizard = (changes) => {
+    if (generationState === 'error') {
+      setGenerationState('idle');
+    }
     setWizardState((prev) => ({ ...prev, ...changes }));
   };
 
@@ -194,8 +198,11 @@ function LandingPage() {
     const randomRadius = radiusOptions[Math.floor(Math.random() * radiusOptions.length)].value;
     const preview = { ...wizardState, mood: randomMood, duration: randomDuration, radius: randomRadius };
     const destination = chooseDestination(preview);
-    const itinerary = buildItinerary(destination, preview);
-    saveTrip(itinerary);
+    const itinerary = normalizeItinerary(buildItinerary(destination, preview), {
+      ...preview,
+      destinationName: destination.name,
+    });
+    if (itinerary) saveTrip(itinerary);
     navigate('/results');
   };
 
@@ -238,36 +245,26 @@ function LandingPage() {
       return;
     }
 
-    setIsGenerating(true);
+    const destination = chooseDestination(wizardState);
+    setGenerationState('loading');
+    setToast('');
+
     try {
-      // Simulate AI processing time
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      const destination = chooseDestination(wizardState);
-      const itinerary = buildItinerary(destination, wizardState);
+      const response = await requestGeneratedItinerary(
+        { name: destination.name, country: destination.country || '' },
+        wizardState,
+      );
+      const itinerary = parseGeneratedItineraryResponse(response, {
+        ...wizardState,
+        destinationName: destination.name,
+      });
       saveTrip(itinerary);
+      setGenerationState('success');
       navigate('/results');
     } catch (error) {
-      setToast('Failed to generate itinerary. Please try again.');
-    } finally {
-      setIsGenerating(false);
+      setGenerationState('error');
+      setToast(error?.message || 'Failed to generate itinerary. Please try again.');
     }
-  };
-
-  const handleWizardSubmit = () => {
-    if (!wizardState.mood.length || !wizardState.duration || !wizardState.radius) {
-      setToast('Complete the wizard selections to see destination suggestions.');
-      return;
-    }
-
-    const items = generateSuggestions(wizardState);
-    setSuggestions(items);
-    setToast('Tap a suggestion to build your itinerary.');
-  };
-
-  const selectSuggestion = (destination) => {
-    const itinerary = buildItinerary(destination, wizardState);
-    saveTrip(itinerary);
-    navigate('/results');
   };
 
   const getExtendedContent = () => {
@@ -554,6 +551,38 @@ function LandingPage() {
             My Trips
           </Link>
         </div>
+
+        {generationState === 'error' && (
+          <div className="rounded-[1.75rem] border border-amber-200 bg-amber-50 p-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-amber-900">Generation failed</p>
+                <p className="mt-1 text-sm text-amber-800">Review your selections above, then try generating again.</p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={handleAutoGenerate}
+                  className="rounded-full bg-amber-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-800"
+                >
+                  Retry generation
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGenerationState('idle');
+                    setExtendedMode(false);
+                    resetGeolocation();
+                    setSheetMode('mood');
+                  }}
+                  className="rounded-full border border-amber-200 bg-white px-5 py-3 text-sm font-semibold text-amber-900 transition hover:border-amber-300"
+                >
+                  Edit parameters
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Loading Screen Overlay */}

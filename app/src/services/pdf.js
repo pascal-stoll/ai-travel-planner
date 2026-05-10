@@ -1,11 +1,13 @@
 import { jsPDF } from 'jspdf';
+import { getItineraryDestinationName } from '../features/results/itineraryNormalizer.js';
 
 export function exportItineraryToPdf(itinerary) {
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const titleY = 40;
+  const destinationName = getItineraryDestinationName(itinerary);
 
   doc.setFontSize(22);
-  doc.text(`TravelMind · ${itinerary.destination}`, 40, titleY);
+  doc.text(`TravelMind · ${destinationName}`, 40, titleY);
   doc.setFontSize(12);
   doc.text(`Mood: ${itinerary.mood} • Duration: ${itinerary.duration} • Radius: ${itinerary.radius}`, 40, titleY + 24);
   doc.setTextColor(100);
@@ -37,7 +39,7 @@ export function exportItineraryToPdf(itinerary) {
     });
   });
 
-  doc.save(`${itinerary.destination.replace(/\s+/g, '_')}_Itinerary.pdf`);
+  doc.save(`${destinationName.replace(/\s+/g, '_')}_Itinerary.pdf`);
 }
 
 function drawRouteGraphic(doc, x, y, width, height) {
