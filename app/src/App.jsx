@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage.jsx';
 import ResultsPage from './pages/ResultsPage.jsx';
@@ -11,7 +12,7 @@ function App() {
       <Router>
         <div className="min-h-screen bg-slate-50 text-slate-900">
           <Navigation />
-          <main className="pt-16"> {/* Account for fixed navigation height */}
+          <main className="pt-20">
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/results" element={<ResultsPage />} />

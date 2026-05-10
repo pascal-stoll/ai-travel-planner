@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 const Navigation = () => {
@@ -9,41 +10,34 @@ const Navigation = () => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-ocean-deep to-sunset-gold rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">TM</span>
+    <nav className="fixed left-0 right-0 top-0 z-50 border-b border-white/70 bg-white/82 backdrop-blur-xl">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-18 items-center justify-between gap-4 py-3">
+          <Link to="/" className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-ocean-deep via-[#155a74] to-sunset-gold shadow-[0_12px_24px_rgba(26,107,138,0.22)]">
+              <span className="text-lg">✈</span>
             </div>
-            <span className="font-bold text-slate-dark text-lg">TravelMind</span>
+            <div className="leading-tight">
+              <span className="block text-[1.45rem] font-semibold tracking-[-0.04em] text-slate-950">TravelMind</span>
+              <span className="block text-xs font-medium uppercase tracking-[0.24em] text-slate-500">AI-Powered Travel Planner</span>
+            </div>
           </Link>
 
-          {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="flex items-center gap-2 sm:gap-3">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
                   location.pathname === item.path
-                    ? 'bg-ocean-deep/10 text-ocean-deep font-medium'
-                    : 'text-slate-medium hover:text-slate-dark hover:bg-slate-50'
+                    ? 'bg-slate-950 text-white shadow-[0_12px_24px_rgba(15,23,42,0.18)]'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'
                 }`}
               >
-                <span>{item.icon}</span>
                 <span>{item.label}</span>
               </Link>
             ))}
           </div>
-
-          {/* Mobile Menu Button */}
-          <button className="md:hidden p-2 rounded-lg hover:bg-slate-50">
-            <svg className="w-6 h-6 text-slate-medium" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
         </div>
       </div>
     </nav>

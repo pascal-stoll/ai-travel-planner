@@ -60,8 +60,10 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: var(--font-family-primary);
-  background: radial-gradient(circle at top left, rgba(240,109,60,0.12), transparent 22%),
-    linear-gradient(180deg, #f8fbff 0%, var(--color-slate-bg) 100%);
+  background:
+    radial-gradient(circle at top left, rgba(26, 107, 138, 0.12), transparent 20%),
+    radial-gradient(circle at top right, rgba(244, 123, 32, 0.11), transparent 18%),
+    linear-gradient(180deg, #fbf8f1 0%, #f4efe5 100%);
 }
 
 button,
