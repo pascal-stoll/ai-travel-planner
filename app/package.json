@@ -4,8 +4,9 @@
   "version": "0.1.0",
   "description": "TravelMind AI travel planner",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "vite --mode development",
+    "prod": "vite --mode production",
+    "build": "vite build --mode production",
     "preview": "vite preview",
     "check": "node --check src/main.jsx",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",

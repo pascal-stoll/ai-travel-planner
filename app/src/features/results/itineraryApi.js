@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { getApiBaseUrl } from '../../config/runtime.js';
+
+const API_BASE_URL = getApiBaseUrl();
 
 function buildError(message, code) {
   const error = new Error(message);
@@ -34,4 +36,3 @@ export async function requestGeneratedItinerary(destination, preferences) {
 
   return payload;
 }
-

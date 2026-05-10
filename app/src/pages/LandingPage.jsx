@@ -4,9 +4,7 @@ import { useTravel } from '../context/useTravel.js';
 import { BottomSheet } from '../components/BottomSheet.jsx';
 import { TripBriefChips } from '../components/TripBriefChips.jsx';
 import { ExtendedWizard } from '../components/ExtendedWizard.jsx';
-import { buildItinerary, chooseDestination } from '../services/itinerary.js';
-import { requestGeneratedItinerary } from '../features/results/itineraryApi.js';
-import { normalizeItinerary, parseGeneratedItineraryResponse } from '../features/results/itineraryNormalizer.js';
+import { generateItineraryForWizard } from '../features/results/generateItinerary.js';
 import { durationOptions, moodOptions, radiusOptions } from '../utils/constants.js';
 
 function LandingPage() {
@@ -197,13 +195,19 @@ function LandingPage() {
     const randomDuration = durationOptions[Math.floor(Math.random() * durationOptions.length)].value;
     const randomRadius = radiusOptions[Math.floor(Math.random() * radiusOptions.length)].value;
     const preview = { ...wizardState, mood: randomMood, duration: randomDuration, radius: randomRadius };
-    const destination = chooseDestination(preview);
-    const itinerary = normalizeItinerary(buildItinerary(destination, preview), {
-      ...preview,
-      destinationName: destination.name,
-    });
-    if (itinerary) saveTrip(itinerary);
-    navigate('/results');
+    setGenerationState('loading');
+    setToast('');
+
+    generateItineraryForWizard(preview)
+      .then(({ itinerary }) => {
+        saveTrip(itinerary);
+        setGenerationState('success');
+        navigate('/results');
+      })
+      .catch((error) => {
+        setGenerationState('error');
+        setToast(error?.message || 'Failed to generate a surprise trip.');
+      });
   };
 
   const handleMoodSelect = (selectedMoods) => {
@@ -245,19 +249,11 @@ function LandingPage() {
       return;
     }
 
-    const destination = chooseDestination(wizardState);
     setGenerationState('loading');
     setToast('');
 
     try {
-      const response = await requestGeneratedItinerary(
-        { name: destination.name, country: destination.country || '' },
-        wizardState,
-      );
-      const itinerary = parseGeneratedItineraryResponse(response, {
-        ...wizardState,
-        destinationName: destination.name,
-      });
+      const { itinerary } = await generateItineraryForWizard(wizardState);
       saveTrip(itinerary);
       setGenerationState('success');
       navigate('/results');
