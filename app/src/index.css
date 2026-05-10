@@ -1,3 +1,17 @@
+/* RS03 — Prevent horizontal scrolling */
+html, body {
+  overflow-x: hidden;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+img, video, canvas, svg, iframe, embed, object {
+  max-width: 100%;
+  height: auto;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -79,4 +93,59 @@ button {
 
 ::selection {
   background: rgba(26, 107, 138, 0.18);
+}
+
+/* RS01 — Optimize Results page for mobile */
+.results-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.results-page__header {
+  padding: var(--space-2xl) var(--space-2xl) 0;
+}
+
+.results-page__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Map container takes all available space below the header */
+.map-view {
+  flex: 1;
+  min-height: 300px; /* prevents collapse on mobile */
+}
+
+/* Tablet and desktop: two-column layout */
+@media (min-width: 768px) {
+  .results-page__body {
+    flex-direction: row;
+  }
+  .map-view {
+    flex: 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .results-page {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+/* RS02 — Validate 360px viewport support */
+@media (max-width: 360px) {
+  .stop-detail-sheet {
+    padding: var(--space-md) var(--space-md) var(--space-xl);
+  }
+
+  .stop-detail-name {
+    font-size: 18px;
+  }
+
+  .results-page__header {
+    padding: var(--space-sm) var(--space-sm) 0;
+  }
 }

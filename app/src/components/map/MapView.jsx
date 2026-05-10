@@ -22,7 +22,7 @@ const createNumberedIcon = (number, isSelected = false) => {
   });
 };
 
-const MapView = ({ itinerary }) => {
+const MapView = ({ itinerary, onStopClick }) => {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const recenterControl = useRef(null); // MV08
@@ -69,6 +69,9 @@ const MapView = ({ itinerary }) => {
             stopNumber++;
             const marker = L.marker([coords[0], coords[1]], {
               icon: createNumberedIcon(stopNumber),
+            });
+            marker.on('click', () => {
+              if (onStopClick) onStopClick(stop, stopNumber - 1); // stopIndex 0-based
             });
             marker.addTo(map);
             markers.push(marker);

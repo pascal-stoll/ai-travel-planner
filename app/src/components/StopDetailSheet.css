@@ -1,0 +1,121 @@
+.stop-detail-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 2000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 100ms ease-out;
+}
+
+.stop-detail-sheet {
+  background-color: var(--color-white);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  width: 100%;
+  max-width: 600px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: var(--space-3xl) var(--space-3xl) var(--space-5xl);
+  box-shadow: var(--shadow-md);
+  animation: slideUp 100ms ease-out;
+  touch-action: none; /* per swipe */
+}
+
+.stop-detail-sheet__handle {
+  width: 40px;
+  height: 4px;
+  background-color: #e2e8f0;
+  border-radius: 2px;
+  margin: 0 auto var(--space-2xl) auto;
+}
+
+.stop-detail-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-2xl);
+}
+
+.stop-detail-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--color-ocean-deep);
+  color: var(--color-white);
+  font-family: var(--font-family-primary);
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stop-detail-name {
+  font-family: var(--font-family-primary);
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--color-slate-dark);
+  margin: 0;
+}
+
+.stop-detail-category {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--space-lg);
+  border-radius: var(--radius-xl);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.stop-detail-category--restaurant { background-color: var(--color-sunset-gold); color: var(--color-white); }
+.stop-detail-category--museum     { background-color: var(--color-ocean-deep);  color: var(--color-white); }
+.stop-detail-category--nature     { background-color: var(--color-forest-trail); color: var(--color-white); }
+.stop-detail-category--landmark   { background-color: var(--color-slate-medium); color: var(--color-white); }
+.stop-detail-category--activity   { background-color: #C0392B; color: var(--color-white); }
+
+.stop-detail-times {
+  display: flex;
+  gap: var(--space-3xl);
+  margin: var(--space-lg) 0;
+  font-family: var(--font-family-primary);
+  font-size: 13px;
+  color: var(--color-slate-medium);
+}
+
+.stop-detail-times span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stop-detail-description {
+  font-family: var(--font-family-primary);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-slate-medium);
+  margin-bottom: var(--space-3xl);
+}
+
+.regenerate-btn {
+  width: 100%;
+  height: 48px;
+  border: 1.5px solid var(--color-ocean-deep);
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--color-ocean-deep);
+  font-family: var(--font-family-primary);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20%); }
+  to   { transform: translateY(0); }
+}
