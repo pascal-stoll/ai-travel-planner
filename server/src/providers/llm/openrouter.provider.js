@@ -13,8 +13,7 @@ class OpenRouterProvider extends BaseLLMProvider {
     super(config);
     this.apiKey = config.apiKey;
     this.baseURL = config.baseURL || 'https://openrouter.ai';
-    // this.model = config.model || 'gpt-4o-mini';
-    this.model = 'openai/gpt-oss-120b:free'
+    this.model = config.model || 'openrouter/free';
     this.temperature = config.temperature || 0.7;
     this.maxTokens = config.maxTokens || 4000;
   }
