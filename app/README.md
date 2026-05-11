@@ -14,13 +14,13 @@ Open `index.html` in a browser, or serve the folder with a static web server for
 
 For the React app in `app/`, use:
 
-- `npm run dev` for the mock/local itinerary flow
+- `npm run dev` for the backend API flow via the Vite dev proxy
 - `npm run prod` for the production-mode API flow
 
 ## Notes
 
 - Extended wizard uses OpenStreetMap search for location autocomplete.
-- Itinerary generation runs in `mock` mode by default in development and `api` mode by default in production.
-- You can override the mode with `VITE_ITINERARY_MODE=mock` or `VITE_ITINERARY_MODE=api`.
-- The API mode uses `VITE_API_URL` for the backend base URL.
+- Itinerary generation runs in `api` mode by default. You can override the mode with `VITE_ITINERARY_MODE=mock` when you want the local frontend fallback.
+- The dev server proxies `/api` calls to `http://localhost:3001`.
+- `VITE_API_URL` can be used to point the frontend at a different backend base URL.
 - Saved trips and active itinerary are persisted in browser `localStorage`.

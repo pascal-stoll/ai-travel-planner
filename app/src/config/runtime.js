@@ -1,5 +1,9 @@
 export function getApiBaseUrl() {
-  return import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+
+  return import.meta.env.MODE === 'development' ? '' : 'http://localhost:3001';
 }
 
 export function getItineraryMode() {
@@ -8,7 +12,7 @@ export function getItineraryMode() {
     return configuredMode;
   }
 
-  return import.meta.env.MODE === 'production' ? 'api' : 'mock';
+  return 'api';
 }
 
 export function shouldUseMockItineraries() {

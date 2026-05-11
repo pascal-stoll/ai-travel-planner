@@ -109,6 +109,23 @@ function getTravelNote(currentCoords, nextCoords) {
   return 'Allow about 25 minutes for the transfer to the next stop.';
 }
 
+function normalizeSegment(rawSegment, dayIndex, segmentIndex, stops = []) {
+  const fromStopId = toStringValue(rawSegment?.fromStopId, stops[segmentIndex]?.id || '');
+  const toStopId = toStringValue(rawSegment?.toStopId, stops[segmentIndex + 1]?.id || '');
+  const note = toStringValue(rawSegment?.note, getTravelNote(stops[segmentIndex]?.coordinates, stops[segmentIndex + 1]?.coordinates));
+  const mode = toStringValue(rawSegment?.mode, 'drive');
+  const durationMinutes = parseDurationMinutes(rawSegment?.durationMinutes) ?? 10;
+
+  return {
+    id: toStringValue(rawSegment?.id, `day-${dayIndex + 1}-segment-${segmentIndex + 1}`),
+    fromStopId,
+    toStopId,
+    durationMinutes: Number.isFinite(durationMinutes) ? durationMinutes : 10,
+    note,
+    mode,
+  };
+}
+
 function normalizeDestination(rawDestination, preferences = {}) {
   if (typeof rawDestination === 'string') {
     return {
@@ -172,11 +189,19 @@ function normalizeDay(rawDay, dayIndex, destinationName, preferences = {}) {
     };
   }
 
+  const segmentsSource = toArrayValue(rawDay?.segments);
+  const segments = segmentsSource.length
+    ? segmentsSource.map((segment, segmentIndex) => normalizeSegment(segment, dayIndex, segmentIndex, stops))
+    : stops
+        .slice(0, Math.max(stops.length - 1, 0))
+        .map((stop, segmentIndex) => normalizeSegment(null, dayIndex, segmentIndex, stops));
+
   return {
     id: toStringValue(rawDay?.id, `day-${dayIndex + 1}`),
     day: Number.isFinite(toFiniteNumber(rawDay?.day)) ? toFiniteNumber(rawDay?.day) : dayIndex + 1,
     title: toStringValue(rawDay?.title, `Day ${dayIndex + 1}`),
     stops,
+    segments,
   };
 }
 
