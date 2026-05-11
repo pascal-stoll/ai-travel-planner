@@ -46,9 +46,13 @@ A robust Node.js/Express API server for TravelMind AI travel planner with enterp
 | `PORT` | `3001` | Server port |
 | `NODE_ENV` | `development` | Environment mode |
 | `FRONTEND_URL` | `http://localhost:4173` | Frontend URL for CORS |
-| `LLM_PROVIDER` | `deepseek` | Active LLM provider (deepseek/openai/anthropic) |
+| `AI_PROVIDER` | `deepseek` | Active AI provider (deepseek/gemini/openai/anthropic) |
 | `REQUEST_TIMEOUT_MS` | `15000` | Request timeout in milliseconds |
 | `DEEPSEEK_API_KEY` | - | DeepSeek API key |
+| `GEMINI_API_KEY` | - | Google Gemini API key |
+| `GEMINI_API_VERSION` | `v1beta` | Gemini API version override |
+| `GEMINI_MODEL` | `gemini-1.5-flash` | Gemini model name override |
+| `FALLBACK_AI_PROVIDER` | `deepseek` | Optional fallback provider when primary LLM fails |
 | `OPENAI_API_KEY` | - | OpenAI API key |
 | `ANTHROPIC_API_KEY` | - | Anthropic API key |
 
@@ -57,10 +61,11 @@ A robust Node.js/Express API server for TravelMind AI travel planner with enterp
 The system supports multiple LLM providers with automatic failover capabilities:
 
 - **DeepSeek**: Cost-effective, fast responses
+- **Gemini**: Google's AI model, fast and capable. Requires a valid Gemini API key and may be restricted by geographic or project settings.
 - **OpenAI**: High-quality responses, GPT models
 - **Anthropic**: Safety-focused, Claude models
 
-Switch providers by changing `LLM_PROVIDER` in your environment.
+Switch providers by changing `AI_PROVIDER` in your environment. If `AI_PROVIDER=gemini`, the server can optionally fall back to `FALLBACK_AI_PROVIDER=deepseek` for location-model compatibility issues.
 
 ## 📡 API Reference
 
@@ -110,14 +115,16 @@ Generate a complete travel itinerary using AI.
     }
   },
   "preferences": {
-    "duration": "number",       // 1-30 days
-    "budget": "string",         // "budget" | "moderate" | "luxury"
-    "interests": ["string"],    // 1-10 items, 2-50 chars each
-    "travelStyle": "string",    // "relaxed" | "active" | "cultural" | "adventure"
-    "accommodation": "string",  // optional
-    "transportation": "string", // optional
-    "dietaryRestrictions": ["string"], // optional
-    "accessibility": "boolean"  // optional
+    "mood": ["Culture", "Food"],
+    "duration": "2-3 Days",      // "A few hours" | "1 Day" | "2-3 Days" | "1 Week+"
+    "budget": "Mid-Range",      // "Budget" | "Mid-Range" | "Luxury"
+    "transport": ["public"],
+    "radius": "10km",
+    "location": { "label": "Paris", "coords": [48.8566, 2.3522] },
+    "accommodation": "hotel",
+    "transportation": "public",
+    "dietaryRestrictions": ["Vegetarian"],
+    "accessibility": false
   }
 }
 ```

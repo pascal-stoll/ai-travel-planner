@@ -42,20 +42,29 @@ const parseAiResponse = (aiResponse, validator, errorCodePrefix, responseType) =
 
 const createAiService = ({ llmProvider, promptBuilder, schemaValidator, timeoutMs }) => {
   const generateItinerary = async (destination, preferences) => {
+    console.log('[AI] generateItinerary called with:', { destination, preferences });
     const prompt = promptBuilder.buildItineraryPrompt({ destination, ...preferences });
+    console.log('[AI] Generated prompt length:', prompt.length);
     const aiResponse = await llmProvider.generateCompletion(prompt);
+    console.log('[AI] Received AI response');
     return parseAiResponse(aiResponse, validateItineraryResponse, 'ITINERARY', 'itinerary');
   };
 
   const regenStop = async (destination, dayIndex, stopIndex, existingStops, preferences) => {
+    console.log('[AI] regenStop called with:', { destination, dayIndex, stopIndex, existingStops: existingStops?.length, preferences });
     const prompt = promptBuilder.buildRegenPrompt({ destination, dayIndex, stopIndex, existingStops, ...preferences });
+    console.log('[AI] Generated regen prompt length:', prompt.length);
     const aiResponse = await llmProvider.generateCompletion(prompt);
+    console.log('[AI] Received AI response for regen');
     return parseAiResponse(aiResponse, validateStopRegenResponse, 'REGEN', 'stop_regen');
   };
 
   const suggestDestinations = async (preferences) => {
+    console.log('[AI] suggestDestinations called with:', preferences);
     const prompt = promptBuilder.buildDestinationPrompt(preferences);
+    console.log('[AI] Generated destination prompt length:', prompt.length);
     const aiResponse = await llmProvider.generateCompletion(prompt);
+    console.log('[AI] Received AI response for destinations');
     return parseAiResponse(aiResponse, validateDestinationResponse, 'DESTINATIONS', 'destination');
   };
 

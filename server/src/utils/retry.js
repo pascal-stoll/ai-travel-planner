@@ -123,6 +123,10 @@ async function withRetry(fn, config = new RetryConfig(), context = {}) {
   }
 
   // All attempts failed
+  if (lastError instanceof AppError) {
+    throw lastError;
+  }
+
   throw new AppError(`Operation failed after ${config.maxAttempts} attempts`, {
     status: 502,
     code: 'RETRY_EXHAUSTED',

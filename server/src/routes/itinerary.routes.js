@@ -6,5 +6,7 @@ module.exports = (deps) => {
   const controller = createItineraryController(deps);
 
   router.post('/generate-itinerary', controller.generateItinerary);
+  // Alias routes for simpler API and frontend compatibility
+  router.post('/generate', controller.generateItinerary);
   return router;
 };

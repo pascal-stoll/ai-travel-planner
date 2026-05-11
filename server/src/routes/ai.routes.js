@@ -7,5 +7,7 @@ module.exports = (deps) => {
 
   router.post('/suggest-destinations', controller.suggestDestinations);
   router.post('/regen-stop', controller.regenStop);
+  // Alias routes for simpler API
+  router.post('/regen', controller.regenStop);
   return router;
 };

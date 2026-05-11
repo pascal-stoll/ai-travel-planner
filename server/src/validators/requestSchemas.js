@@ -21,35 +21,38 @@ const destinationSchema = Joi.object({
 });
 
 const preferencesSchema = Joi.object({
-  duration: Joi.number().integer().min(1).max(30).required()
+  mood: Joi.array().items(
+    Joi.string().min(2).max(50)
+  ).min(1).max(10).optional()
     .messages({
-      'number.base': 'Duration must be a number',
-      'number.min': 'Duration must be at least 1 day',
-      'number.max': 'Duration cannot exceed 30 days',
+      'array.min': 'At least one mood is required',
+      'array.max': 'Cannot have more than 10 moods',
+      'string.min': 'Each mood must be at least 2 characters',
+      'string.max': 'Each mood cannot exceed 50 characters'
+    }),
+  duration: Joi.string().valid('A few hours', '1 Day', '2–3 Days', '2-3 Days', '1 Week+').required()
+    .messages({
+      'any.only': 'Duration must be one of: A few hours, 1 Day, 2–3 Days, 2-3 Days, 1 Week+',
       'any.required': 'Duration is required'
     }),
-  budget: Joi.string().valid('budget', 'moderate', 'luxury').required()
+  budget: Joi.string().valid('Budget', 'Mid-Range', 'Luxury').required()
     .messages({
-      'any.only': 'Budget must be one of: budget, moderate, luxury',
+      'any.only': 'Budget must be one of: Budget, Mid-Range, Luxury',
       'any.required': 'Budget is required'
     }),
-  interests: Joi.array().items(
+  transport: Joi.array().items(
     Joi.string().min(2).max(50)
-  ).min(1).max(10).required()
-    .messages({
-      'array.min': 'At least one interest is required',
-      'array.max': 'Cannot have more than 10 interests',
-      'string.min': 'Each interest must be at least 2 characters',
-      'string.max': 'Each interest cannot exceed 50 characters',
-      'any.required': 'Interests are required'
-    }),
-  travelStyle: Joi.string().valid('relaxed', 'active', 'cultural', 'adventure').required()
-    .messages({
-      'any.only': 'Travel style must be one of: relaxed, active, cultural, adventure',
-      'any.required': 'Travel style is required'
-    }),
-  accommodation: Joi.string().valid('hotel', 'hostel', 'airbnb', 'resort').optional(),
-  transportation: Joi.string().valid('public', 'rental', 'taxi', 'walking').optional(),
+  ).optional(),
+  radius: Joi.string().optional(),
+  location: Joi.object({
+    label: Joi.string().optional(),
+    coords: Joi.array().items(Joi.number()).length(2).optional()
+  }).optional(),
+  // Legacy fields for backward compatibility
+  interests: Joi.array().items(Joi.string()).optional(),
+  travelStyle: Joi.string().optional(),
+  accommodation: Joi.string().optional(),
+  transportation: Joi.string().optional(),
   dietaryRestrictions: Joi.array().items(Joi.string()).optional(),
   accessibility: Joi.boolean().optional()
 });
