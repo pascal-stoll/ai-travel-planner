@@ -4,7 +4,7 @@ A robust Node.js/Express API server for TravelMind AI travel planner with enterp
 
 ## 🚀 Features
 
-- **Multi-LLM Support**: Seamless switching between DeepSeek, OpenAI, and Anthropic
+- **Multi-LLM Support**: Seamless switching between DeepSeek, OpenAI, Anthropic, and local mock mode
 - **Request Validation**: Joi-based validation with detailed error messages
 - **Rate Limiting**: Token bucket algorithm with configurable limits
 - **Circuit Breaker**: Automatic failure detection and recovery for external services
@@ -46,7 +46,8 @@ A robust Node.js/Express API server for TravelMind AI travel planner with enterp
 | `PORT` | `3001` | Server port |
 | `NODE_ENV` | `development` | Environment mode |
 | `FRONTEND_URL` | `http://localhost:4173` | Frontend URL for CORS |
-| `AI_PROVIDER` | `deepseek` | Active AI provider (deepseek/gemini/openai/anthropic) |
+| `LLM_PROVIDER` | `mock` in development, `deepseek` otherwise | Active AI provider (`mock`/`deepseek`/`gemini`/`openai`/`anthropic`/`openrouter`) |
+| `AI_PROVIDER` | legacy alias | Backward-compatible alias for `LLM_PROVIDER` |
 | `REQUEST_TIMEOUT_MS` | `15000` | Request timeout in milliseconds |
 | `DEEPSEEK_API_KEY` | - | DeepSeek API key |
 | `GEMINI_API_KEY` | - | Google Gemini API key |
@@ -65,7 +66,7 @@ The system supports multiple LLM providers with automatic failover capabilities:
 - **OpenAI**: High-quality responses, GPT models
 - **Anthropic**: Safety-focused, Claude models
 
-Switch providers by changing `AI_PROVIDER` in your environment. If `AI_PROVIDER=gemini`, the server can optionally fall back to `FALLBACK_AI_PROVIDER=deepseek` for location-model compatibility issues.
+Switch providers by changing `LLM_PROVIDER` in your environment. `AI_PROVIDER` is still accepted for backward compatibility. If `LLM_PROVIDER=gemini`, the server can optionally fall back to `FALLBACK_AI_PROVIDER=deepseek` for location-model compatibility issues. If `LLM_PROVIDER=mock`, the API serves realistic local development responses without any external LLM key.
 
 ## 📡 API Reference
 
