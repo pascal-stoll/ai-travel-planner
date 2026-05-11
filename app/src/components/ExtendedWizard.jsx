@@ -35,7 +35,6 @@ function createInitialData(initialData = {}) {
     location: {
       cityName: initialData.location?.cityName || initialData.location?.label || initialData.cityName || '',
       radiusChoice: normalizeRadiusValue(initialData.location?.radiusChoice || initialData.radius || ''),
-      customRadiusKm: initialData.location?.radiusKm ? String(initialData.location.radiusKm) : '',
     },
     duration: initialData.duration || '',
     budget: initialData.budget || 'Mid-Range',
@@ -63,8 +62,7 @@ function isRadiusValid(location) {
   if (!location) return false;
   if (location.radiusChoice === 'Anywhere') return true;
   if (radiusOptions.some((option) => option.value === location.radiusChoice)) return true;
-  const customRadius = Number(location.customRadiusKm);
-  return Number.isFinite(customRadius) && customRadius > 0;
+  return false;
 }
 
 function validateStep(stepId, draft) {
@@ -73,7 +71,7 @@ function validateStep(stepId, draft) {
       return draft.tripType.length > 0 ? '' : 'Please select at least one travel style.';
     case 'location':
       if (!draft.location.cityName.trim()) return 'Please enter a departure city.';
-      if (!isRadiusValid(draft.location)) return 'Please select a valid radius or enter a custom distance.';
+      if (!isRadiusValid(draft.location)) return 'Please select a valid radius.';
       return '';
     case 'duration':
       return draft.duration ? '' : 'Please select a travel duration.';
@@ -92,8 +90,6 @@ function validateStep(stepId, draft) {
 
 function buildSubmitPayload(draft) {
   const radiusChoice = normalizeRadiusValue(draft.location.radiusChoice);
-  const customRadiusKm = Number(draft.location.customRadiusKm);
-  const radiusKm = Number.isFinite(customRadiusKm) && customRadiusKm > 0 ? customRadiusKm : null;
 
   return {
     source: 'extended-wizard',
@@ -102,7 +98,6 @@ function buildSubmitPayload(draft) {
     location: {
       cityName: draft.location.cityName.trim(),
       radiusChoice,
-      radiusKm,
       label: draft.location.cityName.trim(),
       coords: null,
     },
@@ -113,11 +108,7 @@ function buildSubmitPayload(draft) {
     children: draft.travellerGroup.children,
     transportModes: draft.transportModes,
     transport: draft.transportModes,
-    radius: radiusChoice === 'Anywhere'
-      ? 'Anywhere'
-      : radiusKm
-        ? `${radiusKm} km`
-        : radiusChoice,
+    radius: radiusChoice,
   };
 }
 
@@ -283,11 +274,7 @@ export function ExtendedWizard({ initialData, onSubmit, onClose }) {
 
   const transportSummary = draft.transportModes.length ? draft.transportModes.join(', ') : 'Not selected';
   const tripTypeSummary = draft.tripType.length ? draft.tripType.join(' + ') : 'Not selected';
-  const radiusSummary = draft.location.radiusChoice === 'Anywhere'
-    ? 'Anywhere'
-    : Number.isFinite(Number(draft.location.customRadiusKm)) && Number(draft.location.customRadiusKm) > 0
-      ? `${draft.location.customRadiusKm} km`
-      : draft.location.radiusChoice || 'Not selected';
+  const radiusSummary = draft.location.radiusChoice || 'Not selected';
 
   return (
     <div className="space-y-5">
@@ -353,32 +340,12 @@ export function ExtendedWizard({ initialData, onSubmit, onClose }) {
                     <SelectChip
                       key={option.value}
                       active={draft.location.radiusChoice === option.value}
-                      onClick={() => updateLocation({ radiusChoice: option.value, customRadiusKm: '' })}
+                      onClick={() => updateLocation({ radiusChoice: option.value })}
                     >
                       {option.label}
                     </SelectChip>
                   ))}
-                  <SelectChip
-                    active={draft.location.radiusChoice === 'Custom'}
-                    onClick={() => updateLocation({ radiusChoice: 'Custom' })}
-                  >
-                    Custom distance
-                  </SelectChip>
                 </div>
-                {draft.location.radiusChoice === 'Custom' ? (
-                  <label className="block rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
-                    <span className="mb-2 block text-sm font-semibold text-slate-900">Custom radius in km</span>
-                    <input
-                      type="number"
-                      min="1"
-                      max="5000"
-                      value={draft.location.customRadiusKm}
-                      onChange={(event) => updateLocation({ customRadiusKm: event.target.value })}
-                      placeholder="e.g. 150"
-                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm focus:border-slate-900 focus:outline-none"
-                    />
-                  </label>
-                ) : null}
               </div>
             </div>
           )}
