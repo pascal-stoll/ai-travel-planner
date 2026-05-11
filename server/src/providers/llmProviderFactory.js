@@ -5,6 +5,7 @@
  */
 
 const DeepSeekProvider = require('./llm/deepseek.provider');
+const MockProvider = require('./llm/mock.provider');
 const GeminiProvider = require('./llm/gemini.provider');
 const OpenAIProvider = require('./llm/openai.provider');
 const AnthropicProvider = require('./llm/anthropic.provider');
@@ -14,6 +15,7 @@ const AppError = require('../utils/AppError');
 class LLMProviderFactory {
   static createProvider(providerName, config = {}) {
     const providers = {
+      mock: MockProvider,
       deepseek: DeepSeekProvider,
       gemini: GeminiProvider,
       openai: OpenAIProvider,
@@ -77,6 +79,7 @@ class LLMProviderFactory {
 
   static _getApiKeyForProvider(providerName, envConfig) {
     const keyMap = {
+      mock: null,
       deepseek: envConfig.deepseekApiKey,
       gemini: envConfig.geminiApiKey,
       openai: envConfig.openaiApiKey,
