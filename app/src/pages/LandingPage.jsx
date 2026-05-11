@@ -4,7 +4,7 @@ import { useTravel } from '../context/useTravel.js';
 import { BottomSheet } from '../components/BottomSheet.jsx';
 import { TripBriefChips } from '../components/TripBriefChips.jsx';
 import { ExtendedWizard } from '../components/ExtendedWizard.jsx';
-import { generateItineraryForWizard } from '../features/results/generateItinerary.js';
+import { generateItineraryForExtendedWizard, generateItineraryForWizard } from '../features/results/generateItinerary.js';
 import { durationOptions, moodOptions, radiusOptions } from '../utils/constants.js';
 
 function LandingPage() {
@@ -25,6 +25,21 @@ function LandingPage() {
   });
   const navigate = useNavigate();
   const isGenerating = generationState === 'loading';
+
+  const runGeneration = async (state, generator) => {
+    setGenerationState('loading');
+    setToast('');
+
+    try {
+      const { itinerary } = await generator(state);
+      saveTrip(itinerary);
+      setGenerationState('success');
+      navigate('/results');
+    } catch (error) {
+      setGenerationState('error');
+      setToast(error?.message || 'Failed to generate itinerary. Please try again.');
+    }
+  };
 
   const updateWizard = (changes) => {
     if (generationState === 'error') {
@@ -199,19 +214,7 @@ function LandingPage() {
     const randomDuration = durationOptions[Math.floor(Math.random() * durationOptions.length)].value;
     const randomRadius = radiusOptions[Math.floor(Math.random() * radiusOptions.length)].value;
     const preview = { ...wizardState, mood: randomMood, duration: randomDuration, radius: randomRadius };
-    setGenerationState('loading');
-    setToast('');
-
-    generateItineraryForWizard(preview)
-      .then(({ itinerary }) => {
-        saveTrip(itinerary);
-        setGenerationState('success');
-        navigate('/results');
-      })
-      .catch((error) => {
-        setGenerationState('error');
-        setToast(error?.message || 'Failed to generate a surprise trip.');
-      });
+    runGeneration(preview, generateItineraryForWizard);
   };
 
   const handleMoodSelect = (selectedMoods) => {
@@ -249,18 +252,17 @@ function LandingPage() {
       return;
     }
 
-    setGenerationState('loading');
-    setToast('');
+    runGeneration(wizardState, generateItineraryForWizard);
+  };
 
-    try {
-      const { itinerary } = await generateItineraryForWizard(wizardState);
-      saveTrip(itinerary);
-      setGenerationState('success');
-      navigate('/results');
-    } catch (error) {
-      setGenerationState('error');
-      setToast(error?.message || 'Failed to generate itinerary. Please try again.');
-    }
+  const handleExtendedWizardSubmit = async (wizardData) => {
+    await runGeneration(wizardData, generateItineraryForExtendedWizard);
+  };
+
+  const handleOpenExtendedWizard = () => {
+    setSheetMode('wizard');
+    setExtendedMode(false);
+    resetGeolocation();
   };
 
   const getExtendedContent = () => {
@@ -524,6 +526,14 @@ function LandingPage() {
               <span className="text-xl">⬡</span>
               Surprise Me
             </button>
+            <button
+              type="button"
+              onClick={handleOpenExtendedWizard}
+              className="inline-flex items-center justify-center gap-3 rounded-full border border-slate-200 bg-white px-8 py-4 text-base font-semibold text-slate-900 shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:border-slate-300 hover:bg-slate-50"
+            >
+              <span className="text-xl">⋯</span>
+              Full Wizard
+            </button>
           </div>
 
           <p className="mt-6 text-sm text-slate-500">
@@ -784,9 +794,13 @@ function LandingPage() {
 
         {sheetMode === 'wizard' && (
           <ExtendedWizard
-            wizardState={wizardState}
-            onChange={updateWizard}
-            onSubmit={handleAutoGenerate}
+            initialData={wizardState}
+            onSubmit={handleExtendedWizardSubmit}
+            onClose={() => {
+              setSheetMode(null);
+              setExtendedMode(false);
+              resetGeolocation();
+            }}
           />
         )}
       </BottomSheet>
