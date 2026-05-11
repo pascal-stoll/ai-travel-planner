@@ -1,76 +1,70 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { defaultWizardState } from '../utils/constants.js';
 import { tryNormalizeItinerary } from '../features/results/itineraryNormalizer.js';
+import {
+  clearTripBrief,
+  deleteSavedTrip,
+  getSavedTrips,
+  getStoredActiveItinerary,
+  getTripBrief,
+  saveGeneratedTrip,
+  saveStoredActiveItinerary,
+  saveTripBrief,
+} from '../services/tripStorage.js';
 import { TravelContext } from './travelContext.js';
 
-const STORAGE_KEYS = {
-  ACTIVE: 'travelmind-active',
-  HISTORY: 'travelmind-history',
-  WIZARD: 'travelmind-wizard',
-};
+function hydrateWizardState(brief) {
+  if (!brief) return defaultWizardState;
 
-function readJson(key, fallback) {
-  if (typeof window === 'undefined') return fallback;
-  try {
-    const raw = window.localStorage.getItem(key);
-    if (!raw) return fallback;
-
-    const parsed = JSON.parse(raw);
-
-    if (key === STORAGE_KEYS.WIZARD && parsed.timestamp) {
-      const age = Date.now() - parsed.timestamp;
-      const maxAge = 24 * 60 * 60 * 1000;
-      if (age > maxAge) {
-        window.localStorage.removeItem(key);
-        return fallback;
-      }
-    }
-
-    return key === STORAGE_KEYS.WIZARD ? parsed.data : parsed;
-  } catch {
-    return fallback;
-  }
-}
-
-function writeJson(key, value) {
-  if (typeof window === 'undefined') return;
-
-  const data = key === STORAGE_KEYS.WIZARD
-    ? { data: value, timestamp: Date.now() }
-    : value;
-
-  window.localStorage.setItem(key, JSON.stringify(data));
+  return {
+    ...defaultWizardState,
+    mood: Array.isArray(brief.mood) ? brief.mood : defaultWizardState.mood,
+    duration: brief.duration || defaultWizardState.duration,
+    radius: brief.radius || defaultWizardState.radius,
+    location: {
+      ...defaultWizardState.location,
+      label: brief.cityName || defaultWizardState.location.label,
+      coords: null,
+    },
+  };
 }
 
 export function TravelProvider({ children }) {
-  const [wizardState, setWizardState] = useState(() => readJson(STORAGE_KEYS.WIZARD, defaultWizardState));
-  const [activeItinerary, setActiveItinerary] = useState(() => tryNormalizeItinerary(readJson(STORAGE_KEYS.ACTIVE, null)) || null);
-  const [history, setHistory] = useState(() => {
-    const stored = readJson(STORAGE_KEYS.HISTORY, []);
-    return Array.isArray(stored) ? stored.map((item) => tryNormalizeItinerary(item)).filter(Boolean) : [];
-  });
+  const [wizardState, setWizardState] = useState(() => hydrateWizardState(getTripBrief()));
+  const [activeItinerary, setActiveItinerary] = useState(() => getStoredActiveItinerary() || null);
+  const [history, setHistory] = useState(() => getSavedTrips().map((entry) => entry.itinerary).filter(Boolean));
 
   useEffect(() => {
-    writeJson(STORAGE_KEYS.WIZARD, wizardState);
-  }, [wizardState]);
+    const brief = {
+      mood: Array.isArray(wizardState.mood) ? wizardState.mood : [],
+      duration: wizardState.duration || '',
+      radius: wizardState.radius || '',
+      cityName: wizardState.location?.label || '',
+    };
+
+    if (!brief.mood.length && !brief.duration && !brief.radius && !brief.cityName) {
+      clearTripBrief();
+      return;
+    }
+
+    saveTripBrief(brief);
+  }, [wizardState.mood, wizardState.duration, wizardState.radius, wizardState.location?.label]);
 
   useEffect(() => {
-    writeJson(STORAGE_KEYS.ACTIVE, activeItinerary);
+    saveStoredActiveItinerary(activeItinerary);
   }, [activeItinerary]);
-
-  useEffect(() => {
-    writeJson(STORAGE_KEYS.HISTORY, history);
-  }, [history]);
 
   const saveTrip = useCallback((trip) => {
     const normalized = tryNormalizeItinerary(trip);
     if (!normalized) return;
 
+    saveGeneratedTrip(normalized);
     setActiveItinerary(normalized);
     setHistory((current) => {
       if (current.some((item) => item.id === normalized.id)) return current;
       return [normalized, ...current].slice(0, 12);
     });
+    return normalized;
   }, []);
 
   const loadTrip = useCallback((tripId) => {
@@ -79,6 +73,15 @@ export function TravelProvider({ children }) {
       setActiveItinerary(trip);
     }
   }, [history]);
+
+  const removeTrip = useCallback((tripId) => {
+    if (!tripId) return false;
+
+    deleteSavedTrip(tripId);
+    setHistory((current) => current.filter((item) => item.id !== tripId));
+    setActiveItinerary((current) => (current?.id === tripId ? null : current));
+    return true;
+  }, []);
 
   const resetWizard = useCallback(() => setWizardState(defaultWizardState), []);
 
@@ -92,9 +95,10 @@ export function TravelProvider({ children }) {
       setHistory,
       saveTrip,
       loadTrip,
+      removeTrip,
       resetWizard,
     }),
-    [wizardState, activeItinerary, history, saveTrip, loadTrip, resetWizard],
+    [wizardState, activeItinerary, history, saveTrip, loadTrip, removeTrip, resetWizard],
   );
 
   return <TravelContext.Provider value={value}>{children}</TravelContext.Provider>;
