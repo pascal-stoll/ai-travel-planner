@@ -46,9 +46,26 @@ const itineraryResponseSchema = Joi.object({
     country: Joi.string().min(1).max(100).required(),
     coordinates: Joi.array().items(Joi.number()).length(2).optional()
   }).required(),
+  travelStyle: Joi.string().optional(),
+  duration: Joi.string().optional(),
+  radius: Joi.string().optional(),
+  bestTimeToVisit: Joi.string().optional(),
+  transport: Joi.array().items(Joi.string()).optional(),
+  subtitle: Joi.string().optional(),
   days: Joi.array()
     .items(Joi.object({
       day: Joi.number().integer().min(1).required(),
+      title: Joi.string().optional(),
+      segments: Joi.array()
+        .items(Joi.object({
+          id: Joi.string().min(1).required(),
+          fromStopId: Joi.string().min(1).required(),
+          toStopId: Joi.string().min(1).required(),
+          durationMinutes: Joi.number().min(1).max(480).required(),
+          note: Joi.string().min(1).required(),
+          mode: Joi.string().valid('walking', 'public_transport', 'drive', 'car', 'train', 'flight').required()
+        }))
+        .optional(),
       stops: Joi.array()
         .items(Joi.object({
           id: Joi.string().min(1).required(),

@@ -9,6 +9,7 @@ const GeminiProvider = require('./llm/gemini.provider');
 const OpenAIProvider = require('./llm/openai.provider');
 const AnthropicProvider = require('./llm/anthropic.provider');
 const OpenRouterProvider = require('./llm/openrouter.provider');
+const MockProvider = require('./llm/mock.provider');
 const AppError = require('../utils/AppError');
 
 class LLMProviderFactory {
@@ -18,7 +19,8 @@ class LLMProviderFactory {
       gemini: GeminiProvider,
       openai: OpenAIProvider,
       anthropic: AnthropicProvider,
-      openrouter: OpenRouterProvider
+      openrouter: OpenRouterProvider,
+      mock: MockProvider
     };
 
     const ProviderClass = providers[providerName.toLowerCase()];
@@ -42,6 +44,10 @@ class LLMProviderFactory {
       maxRetries: 1,
       retryDelayMs: 1000
     };
+
+    if (providerName === 'mock') {
+      return this.createProvider(providerName, providerConfig);
+    }
 
     if (providerName === 'gemini') {
       providerConfig.apiVersion = envConfig.geminiApiVersion;
@@ -81,7 +87,8 @@ class LLMProviderFactory {
       gemini: envConfig.geminiApiKey,
       openai: envConfig.openaiApiKey,
       anthropic: envConfig.anthropicApiKey,
-      openrouter: envConfig.openrouterApiKey
+      openrouter: envConfig.openrouterApiKey,
+      mock: null
     };
 
     return keyMap[providerName.toLowerCase()];

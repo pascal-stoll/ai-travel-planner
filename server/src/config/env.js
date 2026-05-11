@@ -6,7 +6,7 @@ const getConfig = () => ({
   port: Number(process.env.PORT) || 3001,
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:4173',
   nodeEnv: process.env.NODE_ENV || 'development',
-  llmProvider: process.env.AI_PROVIDER || 'deepseek',
+  llmProvider: (process.env.LLM_PROVIDER || process.env.AI_PROVIDER || ((process.env.NODE_ENV || 'development') === 'development' ? 'mock' : 'deepseek')).toLowerCase(),
   requestTimeoutMs: Number(process.env.REQUEST_TIMEOUT_MS) || 15000,
   deepseekApiKey: process.env.DEEPSEEK_API_KEY,
   geminiApiKey: process.env.GEMINI_API_KEY,
@@ -22,7 +22,7 @@ const getConfig = () => ({
 const validateEnv = () => {
   const required = [];
 
-  const provider = (process.env.AI_PROVIDER || 'deepseek').toLowerCase();
+  const provider = (process.env.LLM_PROVIDER || process.env.AI_PROVIDER || ((process.env.NODE_ENV || 'development') === 'development' ? 'mock' : 'deepseek')).toLowerCase();
   const providerKeys = {
     deepseek: 'DEEPSEEK_API_KEY',
     gemini: 'GEMINI_API_KEY',

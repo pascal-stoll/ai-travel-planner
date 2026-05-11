@@ -53,6 +53,10 @@ app.use('/api/itinerary/generate-itinerary', validateRequest(generateItinerarySc
 // Direct route for frontend compatibility
 app.use('/api/generate-itinerary', validateRequest(generateItinerarySchema));
 
+app.use('/api/ai', aiRoutes({
+  createApiResponse,
+  aiService
+}));
 app.use('/api', itineraryRoutes({
   createApiResponse,
   aiService
@@ -69,6 +73,7 @@ console.log('  POST /api/generate-itinerary (alias)');
 console.log('  POST /api/generate (alias)');
 console.log('  POST /api/ai/suggest-destinations');
 console.log('  POST /api/ai/regen-stop');
+console.log('  POST /api/ai/regen (alias)');
 console.log('  POST /api/regen (alias)');
 console.log('  GET /api/health');
 
