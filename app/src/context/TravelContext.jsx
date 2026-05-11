@@ -29,6 +29,11 @@ function hydrateWizardState(brief) {
   };
 }
 
+function getPersistableCityLabel(wizardState) {
+  const label = wizardState.location?.label || '';
+  return label && label !== defaultWizardState.location.label ? label : '';
+}
+
 export function TravelProvider({ children }) {
   const [wizardState, setWizardState] = useState(() => hydrateWizardState(getTripBrief()));
   const [activeItinerary, setActiveItinerary] = useState(() => getStoredActiveItinerary() || null);
@@ -39,7 +44,7 @@ export function TravelProvider({ children }) {
       mood: Array.isArray(wizardState.mood) ? wizardState.mood : [],
       duration: wizardState.duration || '',
       radius: wizardState.radius || '',
-      cityName: wizardState.location?.label || '',
+      cityName: getPersistableCityLabel(wizardState),
     };
 
     if (!brief.mood.length && !brief.duration && !brief.radius && !brief.cityName) {
