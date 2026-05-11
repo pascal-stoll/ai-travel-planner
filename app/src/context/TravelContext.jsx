@@ -32,7 +32,11 @@ function hydrateWizardState(brief) {
 export function TravelProvider({ children }) {
   const [wizardState, setWizardState] = useState(() => hydrateWizardState(getTripBrief()));
   const [activeItinerary, setActiveItinerary] = useState(() => getStoredActiveItinerary() || null);
-  const [history, setHistory] = useState(() => getSavedTrips().map((entry) => entry.itinerary).filter(Boolean));
+  const [history, setHistory] = useState(() =>
+    getSavedTrips()
+      .map((entry) => (entry.itinerary ? { ...entry.itinerary, source: entry.source || 'localStorage' } : null))
+      .filter(Boolean)
+  );
 
   useEffect(() => {
     const brief = {
@@ -58,13 +62,18 @@ export function TravelProvider({ children }) {
     const normalized = tryNormalizeItinerary(trip);
     if (!normalized) return;
 
-    saveGeneratedTrip(normalized);
-    setActiveItinerary(normalized);
+    const source = typeof trip?.source === 'string' ? trip.source : 'localStorage';
+    const savedEntry = source === 'localStorage' ? saveGeneratedTrip(normalized) : null;
+    const nextTrip = { ...normalized, source: savedEntry?.source || source };
+
+    setActiveItinerary(nextTrip);
     setHistory((current) => {
-      if (current.some((item) => item.id === normalized.id)) return current;
-      return [normalized, ...current].slice(0, 12);
+      if (current.some((item) => item.id === nextTrip.id)) {
+        return current.map((item) => (item.id === nextTrip.id ? { ...item, ...nextTrip } : item));
+      }
+      return [nextTrip, ...current].slice(0, 12);
     });
-    return normalized;
+    return nextTrip;
   }, []);
 
   const loadTrip = useCallback((tripId) => {
@@ -74,14 +83,18 @@ export function TravelProvider({ children }) {
     }
   }, [history]);
 
-  const removeTrip = useCallback((tripId) => {
+  const removeTrip = useCallback((tripId, options = {}) => {
     if (!tripId) return false;
 
-    deleteSavedTrip(tripId);
+    const source = options?.source || history.find((item) => item.id === tripId)?.source || 'localStorage';
+    if (source !== 'mock') {
+      deleteSavedTrip(tripId);
+    }
+
     setHistory((current) => current.filter((item) => item.id !== tripId));
     setActiveItinerary((current) => (current?.id === tripId ? null : current));
     return true;
-  }, []);
+  }, [history]);
 
   const resetWizard = useCallback(() => setWizardState(defaultWizardState), []);
 

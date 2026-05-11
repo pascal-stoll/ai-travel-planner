@@ -1,13 +1,16 @@
-import React, { useEffect, useMemo } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTravel } from '../context/useTravel.js';
 import { TripDetailShell } from '../components/TripDetailShell.jsx';
+import { DeleteTripModal } from '../components/DeleteTripModal.jsx';
 import { parseShareLink } from '../services/share.js';
 import { normalizeItinerary } from '../features/results/itineraryNormalizer.js';
 
 function ResultsPage() {
   const location = useLocation();
-  const { activeItinerary, saveTrip, history, loadTrip } = useTravel();
+  const navigate = useNavigate();
+  const { activeItinerary, saveTrip, history, loadTrip, removeTrip } = useTravel();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const tripId = params.get('trip');
   const sharedTrip = params.get('share');
@@ -66,16 +69,31 @@ function ResultsPage() {
 
   const alreadySaved = history.some((item) => item.id === currentTrip.id);
 
+  const handleDeleteTrip = () => {
+    removeTrip(currentTrip.id, { source: currentTrip.source });
+    setShowDeleteModal(false);
+    navigate('/trips');
+  };
+
   return (
-    <TripDetailShell
-      itinerary={currentTrip}
-      primaryActionHref="/?edit=true"
-      primaryActionLabel="Edit trip"
-      secondaryActionHref="/trips"
-      secondaryActionLabel="My Trips"
-      showSavedState
-      savedLabel={alreadySaved ? 'Saved in My Trips' : 'Not yet saved'}
-    />
+    <>
+      <TripDetailShell
+        itinerary={currentTrip}
+        primaryActionHref="/?edit=true"
+        primaryActionLabel="Edit trip"
+        secondaryActionHref="/trips"
+        secondaryActionLabel="My Trips"
+        onDeleteTrip={() => setShowDeleteModal(true)}
+        showSavedState
+        savedLabel={alreadySaved ? 'Saved in My Trips' : 'Not yet saved'}
+      />
+      <DeleteTripModal
+        open={showDeleteModal}
+        destinationName={currentTrip?.destinationName || currentTrip?.destination?.name || ''}
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteTrip}
+      />
+    </>
   );
 }
 

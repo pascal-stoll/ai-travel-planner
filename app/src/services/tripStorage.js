@@ -184,6 +184,7 @@ function normalizeSavedTripEntry(rawValue) {
 
   return {
     id: toStringValue(rawValue?.id, itinerary.id || generateEntryId(itinerary)),
+    source: toStringValue(rawValue?.source, 'localStorage'),
     destinationName,
     destinationCountry,
     thumbnailUrl,
@@ -202,6 +203,7 @@ export function saveGeneratedTrip(itinerary) {
 
   const entry = normalizeSavedTripEntry({
     id: normalized.id,
+    source: 'localStorage',
     destinationName: getItineraryDestinationName(normalized),
     destinationCountry: getItineraryDestinationCountry(normalized),
     thumbnailUrl: getItineraryDestinationImage(normalized),
