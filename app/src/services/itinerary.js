@@ -1,4 +1,11 @@
-import { destinationLibrary } from '../utils/constants.js';
+import {
+  budgetOptions,
+  destinationLibrary,
+  durationOptions,
+  moodOptions,
+  radiusOptions,
+  transportModes as transportModeOptions,
+} from '../utils/constants.js';
 
 function durationToDays(duration) {
   if (duration === 'A few hours') return 1;
@@ -10,6 +17,13 @@ function durationToDays(duration) {
 
 function getRandomItem(list) {
   return list[Math.floor(Math.random() * list.length)];
+}
+
+function getRandomSubset(list, minCount = 1, maxCount = 1) {
+  const shuffled = [...list].sort(() => Math.random() - 0.5);
+  const upperBound = Math.max(minCount, Math.min(maxCount, shuffled.length));
+  const count = Math.max(minCount, Math.min(upperBound, shuffled.length));
+  return shuffled.slice(0, count);
 }
 
 function generateStopName(stopIndex) {
@@ -48,6 +62,105 @@ export function buildPrompt(wizardState) {
 export function chooseDestination(wizardState) {
   const matches = destinationLibrary.filter((destination) => wizardState.mood.includes(destination.mood));
   return matches.length ? getRandomItem(matches) : getRandomItem(destinationLibrary);
+}
+
+export function buildSurpriseWizardState(baseWizardState = {}) {
+  const moods = getRandomSubset(moodOptions.map((option) => option.value), 1, Math.random() > 0.6 ? 2 : 1);
+  const duration = getRandomItem(durationOptions).value;
+  const radius = getRandomItem(radiusOptions).value;
+  const budget = getRandomItem(budgetOptions);
+  const transport = getRandomSubset(transportModeOptions, 1, Math.random() > 0.7 ? 2 : 1);
+  const cityName = typeof baseWizardState.location?.label === 'string' && baseWizardState.location.label.trim() && baseWizardState.location.label.trim() !== 'Your location'
+    ? baseWizardState.location.label.trim()
+    : 'Stuttgart';
+
+  return {
+    mood: moods,
+    duration,
+    radius,
+    budget,
+    adults: Math.max(1, Number.isFinite(Number(baseWizardState.adults)) ? Number(baseWizardState.adults) : 1 + Math.floor(Math.random() * 3)),
+    children: Math.max(0, Number.isFinite(Number(baseWizardState.children)) ? Number(baseWizardState.children) : Math.floor(Math.random() * 2)),
+    transport,
+    location: {
+      label: cityName,
+      coords: null,
+    },
+    source: 'surprise-me',
+  };
+}
+
+export function buildStopRegenerationRequest(itinerary, dayIndex, stopIndex) {
+  const day = itinerary?.days?.[dayIndex];
+  const stop = day?.stops?.[stopIndex];
+  if (!day || !stop) {
+    throw new Error('Stop not found.');
+  }
+
+  const destinationName = typeof itinerary?.destination === 'string'
+    ? itinerary.destination
+    : itinerary?.destination?.name || itinerary?.destinationName || 'Your trip';
+  const destinationCountry = typeof itinerary?.destination === 'string'
+    ? ''
+    : itinerary?.destination?.country || '';
+  const locationLabel = itinerary?.location?.label || destinationName;
+  const locationCoords = Array.isArray(itinerary?.location?.coords)
+    ? itinerary.location.coords
+    : (Array.isArray(itinerary?.center) ? itinerary.center : null);
+  const location = {};
+
+  if (locationLabel) location.label = locationLabel;
+  if (locationCoords) location.coords = locationCoords;
+
+  return {
+    itineraryId: itinerary?.id || '',
+    dayId: day.id,
+    stopId: stop.id,
+    destination: {
+      name: destinationName,
+      country: destinationCountry,
+      coordinates: Array.isArray(itinerary?.center) ? itinerary.center : undefined,
+    },
+    dayIndex,
+    stopIndex,
+    previousStop: stopIndex > 0
+      ? {
+          name: day.stops[stopIndex - 1].name,
+          type: day.stops[stopIndex - 1].category || 'activity',
+          duration: Math.max(0.5, Number(((Number(day.stops[stopIndex - 1].durationMinutes) || 60) / 60).toFixed(1))),
+          description: day.stops[stopIndex - 1].description,
+        }
+      : null,
+    nextStop: stopIndex < day.stops.length - 1
+      ? {
+          name: day.stops[stopIndex + 1].name,
+          type: day.stops[stopIndex + 1].category || 'activity',
+          duration: Math.max(0.5, Number(((Number(day.stops[stopIndex + 1].durationMinutes) || 60) / 60).toFixed(1))),
+          description: day.stops[stopIndex + 1].description,
+        }
+      : null,
+    existingStops: day.stops.map((item) => ({
+      name: item.name,
+      type: item.category || 'activity',
+      duration: Math.max(0.5, Number(((Number(item.durationMinutes) || 60) / 60).toFixed(1))),
+      description: item.description || 'No description available yet.',
+    })),
+    preferences: {
+      mood: Array.isArray(itinerary?.moodTags) && itinerary.moodTags.length
+        ? itinerary.moodTags
+        : typeof itinerary?.mood === 'string'
+          ? itinerary.mood.split(',').map((item) => item.trim()).filter(Boolean)
+          : [],
+      duration: itinerary?.duration || '',
+      budget: itinerary?.budget || 'Mid-Range',
+      transport: Array.isArray(itinerary?.transport) ? itinerary.transport : [itinerary?.transport].filter(Boolean),
+      radius: itinerary?.radius || '',
+      location: Object.keys(location).length ? location : undefined,
+      adults: Number.isFinite(Number(itinerary?.adults)) ? Number(itinerary.adults) : 2,
+      children: Number.isFinite(Number(itinerary?.children)) ? Number(itinerary.children) : 0,
+      destinationName,
+    },
+  };
 }
 
 export function generateSuggestions(wizardState) {

@@ -5,6 +5,7 @@ import { BottomSheet } from '../components/BottomSheet.jsx';
 import { TripBriefChips } from '../components/TripBriefChips.jsx';
 import { ExtendedWizard } from '../components/ExtendedWizard.jsx';
 import { generateItineraryForExtendedWizard, generateItineraryForWizard } from '../features/results/generateItinerary.js';
+import { buildSurpriseWizardState } from '../services/itinerary.js';
 import { durationOptions, moodOptions, radiusOptions } from '../utils/constants.js';
 
 function LandingPage() {
@@ -210,10 +211,8 @@ function LandingPage() {
   };
 
   const handleSurprise = () => {
-    const randomMood = [moodOptions[Math.floor(Math.random() * moodOptions.length)].value];
-    const randomDuration = durationOptions[Math.floor(Math.random() * durationOptions.length)].value;
-    const randomRadius = radiusOptions[Math.floor(Math.random() * radiusOptions.length)].value;
-    const preview = { ...wizardState, mood: randomMood, duration: randomDuration, radius: randomRadius };
+    const preview = buildSurpriseWizardState(wizardState);
+    updateWizard(preview);
     runGeneration(preview, generateItineraryForWizard);
   };
 
@@ -521,6 +520,7 @@ function LandingPage() {
             <button
               type="button"
               onClick={handleSurprise}
+              aria-label="Generate a surprise itinerary"
               className="inline-flex items-center justify-center gap-3 rounded-full border border-slate-200 bg-white px-8 py-4 text-base font-semibold text-slate-900 shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:border-slate-300 hover:bg-slate-50"
             >
               <span className="text-xl">⬡</span>

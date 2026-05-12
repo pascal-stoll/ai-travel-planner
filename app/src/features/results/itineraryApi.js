@@ -36,3 +36,34 @@ export async function requestGeneratedItinerary(destination, preferences) {
 
   return payload;
 }
+
+export async function requestStopRegeneration(payload) {
+  const response = await fetch(`${API_BASE_URL}/api/regen`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  let responseJson = null;
+  try {
+    responseJson = await response.json();
+  } catch {
+    throw buildError('The stop service returned an unreadable response.', 'INVALID_JSON');
+  }
+
+  if (!response.ok || responseJson?.success === false) {
+    throw buildError(
+      responseJson?.message || responseJson?.error || 'Failed to regenerate stop.',
+      responseJson?.error || responseJson?.code || `HTTP_${response.status}`,
+    );
+  }
+
+  const stop = responseJson?.data?.stop || responseJson?.data || responseJson;
+  if (!stop || typeof stop !== 'object') {
+    throw buildError('The stop service returned an invalid response.', 'INVALID_RESPONSE');
+  }
+
+  return stop;
+}

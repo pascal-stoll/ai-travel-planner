@@ -162,8 +162,20 @@ function normalizeStop(rawStop, dayIndex, stopIndex, destinationName, preference
   };
 }
 
+function normalizeSegment(rawSegment, dayIndex, segmentIndex) {
+  return {
+    id: toStringValue(rawSegment?.id, `day-${dayIndex + 1}-segment-${segmentIndex + 1}`),
+    fromStopId: toStringValue(rawSegment?.fromStopId, ''),
+    toStopId: toStringValue(rawSegment?.toStopId, ''),
+    durationMinutes: Number.isFinite(toFiniteNumber(rawSegment?.durationMinutes)) ? toFiniteNumber(rawSegment?.durationMinutes) : 0,
+    note: toStringValue(rawSegment?.note, 'Short transfer to the next stop.'),
+    mode: toStringValue(rawSegment?.mode, 'walk'),
+  };
+}
+
 function normalizeDay(rawDay, dayIndex, destinationName, preferences = {}) {
   const stops = toArrayValue(rawDay?.stops).map((stop, stopIndex) => normalizeStop(stop, dayIndex, stopIndex, destinationName, preferences));
+  const segments = toArrayValue(rawDay?.segments).map((segment, segmentIndex) => normalizeSegment(segment, dayIndex, segmentIndex));
 
   for (let index = 0; index < stops.length - 1; index += 1) {
     stops[index] = {
@@ -177,6 +189,7 @@ function normalizeDay(rawDay, dayIndex, destinationName, preferences = {}) {
     day: Number.isFinite(toFiniteNumber(rawDay?.day)) ? toFiniteNumber(rawDay?.day) : dayIndex + 1,
     title: toStringValue(rawDay?.title, `Day ${dayIndex + 1}`),
     stops,
+    segments,
   };
 }
 

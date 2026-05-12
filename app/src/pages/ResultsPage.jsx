@@ -4,13 +4,66 @@ import { useTravel } from '../context/useTravel.js';
 import { TripDetailShell } from '../components/TripDetailShell.jsx';
 import { DeleteTripModal } from '../components/DeleteTripModal.jsx';
 import { parseShareLink } from '../services/share.js';
+import { buildStopRegenerationRequest } from '../services/itinerary.js';
+import { requestStopRegeneration } from '../features/results/itineraryApi.js';
 import { normalizeItinerary } from '../features/results/itineraryNormalizer.js';
+
+function toRad(degrees) {
+  return (degrees * Math.PI) / 180;
+}
+
+function buildTravelNote(currentCoords, nextCoords) {
+  if (!currentCoords || !nextCoords) return 'Short transfer to the next stop.';
+
+  const [lat1, lng1] = currentCoords;
+  const [lat2, lng2] = nextCoords;
+  const earthRadiusKm = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const distanceKm = 2 * earthRadiusKm * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  if (!Number.isFinite(distanceKm) || distanceKm < 0.4) return 'About a 5-minute walk to the next stop.';
+  if (distanceKm < 2) return 'Roughly a 10-minute walk to the next stop.';
+  if (distanceKm < 8) return 'Expect around 15 minutes by taxi or transit to the next stop.';
+  return 'Allow about 25 minutes for the transfer to the next stop.';
+}
+
+function applyRegeneratedStop(itinerary, dayId, stopId, replacementStop) {
+  const updatedDays = itinerary.days.map((day) => {
+    if (day.id !== dayId) return day;
+
+    const stops = day.stops.map((stop) => (stop.id === stopId ? { ...stop, ...replacementStop, id: replacementStop.id || stop.id } : stop));
+    const nextStops = stops.map((stop, index) => {
+      if (index === stops.length - 1) return { ...stop, travelToNext: stop.travelToNext || null };
+      return {
+        ...stop,
+        travelToNext: buildTravelNote(stop.coordinates, stops[index + 1].coordinates),
+      };
+    });
+
+    return {
+      ...day,
+      stops: nextStops,
+    };
+  });
+
+  return {
+    ...itinerary,
+    days: updatedDays,
+  };
+}
 
 function ResultsPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { activeItinerary, saveTrip, history, loadTrip, removeTrip } = useTravel();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [regeneratingStopKey, setRegeneratingStopKey] = useState(null);
+  const [regenError, setRegenError] = useState('');
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const tripId = params.get('trip');
   const sharedTrip = params.get('share');
@@ -69,6 +122,25 @@ function ResultsPage() {
 
   const alreadySaved = history.some((item) => item.id === currentTrip.id);
 
+  const handleRegenerateStop = async ({ day, dayIndex, stop, stopIndex }) => {
+    if (!currentTrip) return;
+
+    const regenKey = `${day.id}:${stop.id}`;
+    setRegeneratingStopKey(regenKey);
+    setRegenError('');
+
+    try {
+      const requestPayload = buildStopRegenerationRequest(currentTrip, dayIndex, stopIndex);
+      const replacementStop = await requestStopRegeneration(requestPayload);
+      const updatedTrip = applyRegeneratedStop(currentTrip, day.id, stop.id, replacementStop);
+      saveTrip(updatedTrip);
+    } catch (error) {
+      setRegenError(error?.message || 'Unable to regenerate this stop right now.');
+    } finally {
+      setRegeneratingStopKey(null);
+    }
+  };
+
   const handleDeleteTrip = () => {
     removeTrip(currentTrip.id, { source: currentTrip.source });
     setShowDeleteModal(false);
@@ -77,6 +149,13 @@ function ResultsPage() {
 
   return (
     <>
+      {regenError ? (
+        <div className="mx-auto mt-4 max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-[1.5rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+            {regenError}
+          </div>
+        </div>
+      ) : null}
       <TripDetailShell
         itinerary={currentTrip}
         primaryActionHref="/?edit=true"
@@ -84,6 +163,8 @@ function ResultsPage() {
         secondaryActionHref="/trips"
         secondaryActionLabel="My Trips"
         onDeleteTrip={() => setShowDeleteModal(true)}
+        onRegenerateStop={handleRegenerateStop}
+        regeneratingStopKey={regeneratingStopKey}
         showSavedState
         savedLabel={alreadySaved ? 'Saved in My Trips' : 'Not yet saved'}
       />

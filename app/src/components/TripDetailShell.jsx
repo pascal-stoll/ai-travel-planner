@@ -14,6 +14,8 @@ export function TripDetailShell({
   secondaryActionLabel,
   secondaryActionHref,
   onDeleteTrip = null,
+  onRegenerateStop = null,
+  regeneratingStopKey = null,
   showSavedState = false,
   savedLabel = '',
   showTripListLink = false,
@@ -35,8 +37,13 @@ export function TripDetailShell({
   };
 
   const handleDownload = () => {
-    exportItineraryToPdf(itinerary);
-    setToast('Your itinerary PDF is downloading.');
+    try {
+      exportItineraryToPdf(itinerary);
+      setToast('Your itinerary PDF is downloading.');
+    } catch (error) {
+      console.error('Failed to export itinerary PDF:', error);
+      setToast('Unable to export PDF right now.');
+    }
   };
 
   const topActions = [
@@ -130,7 +137,12 @@ export function TripDetailShell({
       <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.95fr)]">
         <div className="min-w-0">
           <div className="rounded-[2rem] border border-slate-200 bg-white/95 p-4 shadow-card backdrop-blur-xl sm:p-5">
-            <ItineraryList itinerary={itinerary} compact />
+            <ItineraryList
+              itinerary={itinerary}
+              compact
+              onRegenerateStop={onRegenerateStop}
+              regeneratingStopKey={regeneratingStopKey}
+            />
           </div>
         </div>
 

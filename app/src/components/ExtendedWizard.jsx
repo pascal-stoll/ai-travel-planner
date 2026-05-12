@@ -99,7 +99,6 @@ function buildSubmitPayload(draft) {
       cityName: draft.location.cityName.trim(),
       radiusChoice,
       label: draft.location.cityName.trim(),
-      coords: null,
     },
     duration: draft.duration,
     budget: draft.budget,

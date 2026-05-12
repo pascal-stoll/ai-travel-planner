@@ -8,6 +8,10 @@ const getPrimaryProvider = () => {
   const explicitProvider = process.env.LLM_PROVIDER || process.env.AI_PROVIDER;
   if (explicitProvider) return explicitProvider;
 
+  if (process.env.OPENROUTER_API_KEY) {
+    return 'openrouter';
+  }
+
   return getNodeEnv() === 'development' ? 'mock' : 'deepseek';
 };
 

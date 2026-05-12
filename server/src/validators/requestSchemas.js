@@ -35,9 +35,9 @@ const preferencesSchema = Joi.object({
       'any.only': 'Duration must be one of: A few hours, 1 Day, 2–3 Days, 2-3 Days, 1 Week+',
       'any.required': 'Duration is required'
     }),
-  budget: Joi.string().valid('Budget', 'Mid-Range', 'Luxury').required()
+  budget: Joi.string().valid('Economy', 'Budget', 'Mid-Range', 'Premium', 'Luxury').required()
     .messages({
-      'any.only': 'Budget must be one of: Budget, Mid-Range, Luxury',
+      'any.only': 'Budget must be one of: Economy, Budget, Mid-Range, Premium, Luxury',
       'any.required': 'Budget is required'
     }),
   transport: Joi.array().items(

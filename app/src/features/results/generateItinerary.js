@@ -44,10 +44,23 @@ function mergeExtendedWizardSelection(itinerary, wizardData) {
   };
 }
 
+function buildLocationPayload(location = {}) {
+  const payload = {};
+  const label = toLabel(location.label, '');
+  const coords = Array.isArray(location.coords) ? location.coords : null;
+
+  if (label) payload.label = label;
+  if (coords) payload.coords = coords;
+
+  return payload;
+}
+
 export async function generateItineraryForWizard(wizardState) {
   const destination = chooseDestination(wizardState);
+  const location = buildLocationPayload(wizardState.location);
   const preferences = {
     ...wizardState,
+    location: Object.keys(location).length ? location : undefined,
     destinationName: destination.name,
   };
 
@@ -65,7 +78,7 @@ export async function generateItineraryForWizard(wizardState) {
 
   const response = await requestGeneratedItinerary(
     { name: destination.name, country: destination.country || '' },
-    wizardState,
+    preferences,
   );
 
   return {
@@ -76,6 +89,10 @@ export async function generateItineraryForWizard(wizardState) {
 }
 
 export async function generateItineraryForExtendedWizard(wizardData) {
+  const location = buildLocationPayload({
+    label: wizardData.location?.cityName || '',
+    coords: wizardData.location?.coords,
+  });
   const destination = {
     name: wizardData.location?.cityName || 'Your destination',
     country: wizardData.location?.country || '',
@@ -87,10 +104,7 @@ export async function generateItineraryForExtendedWizard(wizardData) {
     budget: wizardData.budget || 'Mid-Range',
     transport: wizardData.transportModes || [],
     radius: wizardData.location?.radiusChoice || '',
-    location: {
-      label: wizardData.location?.cityName || '',
-      coords: null,
-    },
+    location: Object.keys(location).length ? location : undefined,
     adults: wizardData.travellerGroup?.adults ?? 1,
     children: wizardData.travellerGroup?.children ?? 0,
     destinationName: wizardData.location?.cityName || 'Your destination',

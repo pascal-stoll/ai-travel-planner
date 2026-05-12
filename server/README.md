@@ -4,7 +4,7 @@ A robust Node.js/Express API server for TravelMind AI travel planner with enterp
 
 ## 🚀 Features
 
-- **Multi-LLM Support**: Seamless switching between DeepSeek, OpenAI, and Anthropic
+- **Multi-LLM Support**: Seamless switching between DeepSeek, OpenRouter, OpenAI, Gemini, and Anthropic
 - **Request Validation**: Joi-based validation with detailed error messages
 - **Rate Limiting**: Token bucket algorithm with configurable limits
 - **Circuit Breaker**: Automatic failure detection and recovery for external services
@@ -46,7 +46,7 @@ A robust Node.js/Express API server for TravelMind AI travel planner with enterp
 | `PORT` | `3001` | Server port |
 | `NODE_ENV` | `development` | Environment mode |
 | `FRONTEND_URL` | `http://localhost:4173` | Frontend URL for CORS |
-| `AI_PROVIDER` | `deepseek` | Active AI provider (deepseek/gemini/openai/anthropic) |
+| `AI_PROVIDER` | `openrouter` | Active AI provider (deepseek/gemini/openai/anthropic/openrouter) |
 | `REQUEST_TIMEOUT_MS` | `15000` | Request timeout in milliseconds |
 | `DEEPSEEK_API_KEY` | - | DeepSeek API key |
 | `GEMINI_API_KEY` | - | Google Gemini API key |
@@ -55,6 +55,8 @@ A robust Node.js/Express API server for TravelMind AI travel planner with enterp
 | `FALLBACK_AI_PROVIDER` | `deepseek` | Optional fallback provider when primary LLM fails |
 | `OPENAI_API_KEY` | - | OpenAI API key |
 | `ANTHROPIC_API_KEY` | - | Anthropic API key |
+| `OPENROUTER_API_KEY` | - | OpenRouter API key |
+| `OPENROUTER_MODEL` | `gpt-4o-mini` | OpenRouter model name override |
 
 ### LLM Provider Configuration
 
@@ -64,8 +66,9 @@ The system supports multiple LLM providers with automatic failover capabilities:
 - **Gemini**: Google's AI model, fast and capable. Requires a valid Gemini API key and may be restricted by geographic or project settings.
 - **OpenAI**: High-quality responses, GPT models
 - **Anthropic**: Safety-focused, Claude models
+- **OpenRouter**: Model router for OpenAI-compatible chat completions
 
-Switch providers by changing `AI_PROVIDER` in your environment. If `AI_PROVIDER=gemini`, the server can optionally fall back to `FALLBACK_AI_PROVIDER=deepseek` for location-model compatibility issues.
+Switch providers by changing `AI_PROVIDER` in your environment. If `AI_PROVIDER=gemini`, the server can optionally fall back to `FALLBACK_AI_PROVIDER=deepseek` for location-model compatibility issues. For OpenRouter, set `AI_PROVIDER=openrouter` and provide `OPENROUTER_API_KEY`.
 
 ## 📡 API Reference
 
