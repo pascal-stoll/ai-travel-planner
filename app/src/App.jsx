@@ -4,6 +4,7 @@ import LandingPage from './pages/LandingPage.jsx';
 import ResultsPage from './pages/ResultsPage.jsx';
 import MyTripsPage from './pages/MyTripsPage.jsx';
 import TripDetailPage from './pages/TripDetailPage.jsx';
+import SurpriseMePage from './pages/SurpriseMePage.jsx';
 import Navigation from './components/Navigation.jsx';
 import { TravelProvider } from './context/TravelContext.jsx';
 
@@ -19,6 +20,7 @@ function App() {
               <Route path="/results" element={<ResultsPage />} />
               <Route path="/trips" element={<MyTripsPage />} />
               <Route path="/trips/:tripId" element={<TripDetailPage />} />
+              <Route path="/surprise-me" element={<SurpriseMePage />} />
             </Routes>
           </main>
         </div>

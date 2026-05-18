@@ -9,13 +9,26 @@ const buildRegenPrompt = (params) => {
     dayIndex,
     stopIndex,
     existingStops,
+    previousStop: providedPreviousStop = null,
+    nextStop: providedNextStop = null,
     mood = [],
     budget = 'Mid-Range',
     groupSize = { adults: 2, children: 0 }
   } = params;
 
-  const previousStop = existingStops[stopIndex - 1];
-  const nextStop = existingStops[stopIndex + 1];
+  const previousStop = providedPreviousStop || existingStops[stopIndex - 1];
+  const nextStop = providedNextStop || existingStops[stopIndex + 1];
+  const formatStop = (stop, idx) => {
+    const category = stop.category || stop.type || 'activity';
+    const timing = stop.arrivalTime || `${stop.duration}h`;
+    return `${idx + 1}. ${stop.name} (${category}) - ${timing}`;
+  };
+  const formatNeighbor = (label, stop) => {
+    if (!stop) return label === 'Previous stop' ? 'First stop of the day' : 'Last stop of the day';
+
+    const timing = stop.arrivalTime || `${stop.duration}h`;
+    return `${label}: ${stop.name} at ${timing}`;
+  };
 
   return `You are TravelMind, an AI-powered travel planner. Regenerate a single stop for day ${dayIndex + 1} in ${destination.name}.
 
@@ -25,10 +38,10 @@ Context:
 - Group: ${groupSize.adults} adults${groupSize.children > 0 ? `, ${groupSize.children} children` : ''}
 
 Existing stops on this day:
-${existingStops.map((stop, idx) => `${idx + 1}. ${stop.name} (${stop.category}) - ${stop.arrivalTime}`).join('\n')}
+${existingStops.map(formatStop).join('\n')}
 
-${previousStop ? `Previous stop: ${previousStop.name} at ${previousStop.arrivalTime}` : 'First stop of the day'}
-${nextStop ? `Next stop: ${nextStop.name} at ${nextStop.arrivalTime}` : 'Last stop of the day'}
+${formatNeighbor('Previous stop', previousStop)}
+${formatNeighbor('Next stop', nextStop)}
 
 Generate a replacement stop that:
 - Fits logically between the previous and next stops

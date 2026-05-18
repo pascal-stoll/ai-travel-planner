@@ -1,26 +1,54 @@
+// MT03 — Add search/filter input
+// MT04 — Implement real-time filtering
+//
+// ⚠️ ADAPTED: spec rewrote MyTripsPage from scratch using loadAllTrips() +
+//             deleteTrip() and a standalone trips array in useState. The existing
+//             page uses useTravel() context (history + removeTrip) which is the
+//             authoritative source of trip state. We extend the existing page:
+//             - add loadAllTrips/deleteTrip imports (MT01 wrappers)
+//             - keep useTravel() as the state source (history)
+//             - add searchQuery state + filteredTrips computed from history
+//             - replace the inline article grid with TripHistoryCard
+//             - keep the DeleteTripModal pattern from the original
+// ⚠️ ADAPTED: spec used trip._key; context trips use trip.id
+// ⚠️ ADAPTED: navigate to /results?trip=<id> for opening (matches existing Open link)
+
 import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTravel } from '../context/useTravel.js';
 import { DeleteTripModal } from '../components/DeleteTripModal.jsx';
-import { getItineraryDestinationName, getItineraryMoodLabel } from '../features/results/itineraryNormalizer.js';
+import { SwipeableTripCard } from '../components/SwipeableTripCard.jsx';
 
 function MyTripsPage() {
   const { history, removeTrip } = useTravel();
   const navigate = useNavigate();
   const [tripToDelete, setTripToDelete] = useState(null);
 
-  const visibleTrips = useMemo(() => history, [history]);
+  // MT03 — search query state
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const emptyState = visibleTrips.length === 0;
+  // MT04 — real-time filtering on destination name (no debounce, client-side)
+  const filteredTrips = useMemo(() => {
+    if (!searchQuery.trim()) return history;
+    const q = searchQuery.toLowerCase();
+    return history.filter((trip) => {
+      const name = (trip.destinationName || trip.destination?.name || '').toLowerCase();
+      return name.includes(q);
+    });
+  }, [history, searchQuery]);
 
   const handleConfirmDelete = () => {
     if (!tripToDelete) return;
-
     removeTrip(tripToDelete.id, { source: tripToDelete.source });
     setTripToDelete(null);
   };
 
-  if (emptyState) {
+  const handleCardClick = (trip) => {
+    navigate(`/results?trip=${encodeURIComponent(trip.id)}`);
+  };
+
+  // Empty state (no trips at all — before filtering)
+  if (history.length === 0) {
     return (
       <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
         <header className="mb-8 rounded-[2rem] bg-white/90 p-8 shadow-card backdrop-blur-xl">
@@ -29,6 +57,9 @@ function MyTripsPage() {
         </header>
 
         <div className="rounded-[2rem] border border-slate-200 bg-white/90 p-10 text-center shadow-card backdrop-blur-xl">
+          <svg className="mx-auto mb-4 w-16 h-16 text-slate-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+            <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
           <p className="text-lg font-semibold text-slate-950">No trips yet</p>
           <p className="mt-3 text-slate-600">Create an itinerary on the landing page to save a plan here.</p>
           <button
@@ -61,38 +92,52 @@ function MyTripsPage() {
         </div>
       </header>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {visibleTrips.map((trip) => (
-          <article key={trip.id} className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-semibold text-slate-950">{getItineraryDestinationName(trip)}</h2>
-                <p className="mt-1 text-sm text-slate-500">{getItineraryMoodLabel(trip) || 'Flexible'}</p>
-                <p className="mt-3 text-xs text-slate-500">{new Date(trip.generatedAt).toLocaleDateString()}</p>
-              </div>
-              <div className="flex flex-col items-end gap-2">
-                <Link
-                  to={`/results?trip=${encodeURIComponent(trip.id)}`}
-                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:border-slate-300"
-                >
-                  Open
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => setTripToDelete(trip)}
-                  className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-100"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </article>
-        ))}
-      </section>
+      {/* MT03 — Search input */}
+      <div className="relative mb-6">
+        <svg
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" strokeLinecap="round" />
+        </svg>
+        <input
+          id="trips-search"
+          type="text"
+          placeholder="Search by destination name…"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-11 pr-4 py-3 rounded-2xl border border-slate-200
+                     bg-white shadow-sm text-slate-900 placeholder-slate-400 text-sm
+                     focus:outline-none focus:ring-2 focus:ring-ocean-deep/30 focus:border-ocean-deep/50
+                     transition"
+          aria-label="Search saved trips by destination name"
+        />
+      </div>
+
+      {/* MT04 — Real-time filtered list */}
+      {filteredTrips.length === 0 ? (
+        <div className="rounded-[2rem] border border-slate-200 bg-white/90 p-10 text-center shadow-card backdrop-blur-xl">
+          <p className="text-lg font-semibold text-slate-950">No trips match &ldquo;{searchQuery}&rdquo;</p>
+          <p className="mt-2 text-sm text-slate-500">Try a different destination name.</p>
+        </div>
+      ) : (
+        <section className="space-y-3">
+          {filteredTrips.map((trip) => (
+            // MT05 — wrapped in SwipeableTripCard for mobile swipe-to-delete
+            <SwipeableTripCard
+              key={trip.id}
+              trip={trip}
+              onDelete={() => setTripToDelete(trip)}
+              onClick={handleCardClick}
+            />
+          ))}
+        </section>
+      )}
 
       <DeleteTripModal
         open={Boolean(tripToDelete)}
-        destinationName={tripToDelete ? getItineraryDestinationName(tripToDelete) : ''}
+        destinationName={tripToDelete?.destinationName || ''}
         onCancel={() => setTripToDelete(null)}
         onConfirm={handleConfirmDelete}
       />

@@ -50,9 +50,9 @@ const createAiService = ({ llmProvider, promptBuilder, schemaValidator, timeoutM
     return parseAiResponse(aiResponse, validateItineraryResponse, 'ITINERARY', 'itinerary');
   };
 
-  const regenStop = async (destination, dayIndex, stopIndex, existingStops, preferences) => {
+  const regenStop = async (destination, dayIndex, stopIndex, existingStops, preferences, context = {}) => {
     console.log('[AI] regenStop called with:', { destination, dayIndex, stopIndex, existingStops: existingStops?.length, preferences });
-    const prompt = promptBuilder.buildRegenPrompt({ destination, dayIndex, stopIndex, existingStops, ...preferences });
+    const prompt = promptBuilder.buildRegenPrompt({ destination, dayIndex, stopIndex, existingStops, ...context, ...preferences });
     console.log('[AI] Generated regen prompt length:', prompt.length);
     const aiResponse = await llmProvider.generateCompletion(prompt);
     console.log('[AI] Received AI response for regen');

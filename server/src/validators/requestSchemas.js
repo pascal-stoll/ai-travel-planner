@@ -85,6 +85,8 @@ const regenStopSchema = Joi.object({
     Joi.object({
       name: Joi.string().required(),
       type: Joi.string().required(),
+      category: Joi.string().optional(),
+      arrivalTime: Joi.string().optional(),
       duration: Joi.number().min(0.5).max(8).required(),
       description: Joi.string().required()
     })
@@ -93,6 +95,22 @@ const regenStopSchema = Joi.object({
       'array.min': 'At least one existing stop is required',
       'any.required': 'Existing stops are required'
     }),
+  previousStop: Joi.object({
+    name: Joi.string().required(),
+    type: Joi.string().optional(),
+    category: Joi.string().optional(),
+    arrivalTime: Joi.string().optional(),
+    duration: Joi.number().min(0.5).max(8).optional(),
+    description: Joi.string().optional()
+  }).allow(null).optional(),
+  nextStop: Joi.object({
+    name: Joi.string().required(),
+    type: Joi.string().optional(),
+    category: Joi.string().optional(),
+    arrivalTime: Joi.string().optional(),
+    duration: Joi.number().min(0.5).max(8).optional(),
+    description: Joi.string().optional()
+  }).allow(null).optional(),
   preferences: preferencesSchema.required()
 });
 

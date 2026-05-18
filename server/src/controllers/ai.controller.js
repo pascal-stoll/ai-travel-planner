@@ -27,14 +27,14 @@ module.exports = ({ createApiResponse, aiService }) => {
     console.log('[API] Request body:', JSON.stringify(req.body, null, 2));
 
     try {
-      const { destination, dayIndex, stopIndex, existingStops, preferences } = req.body;
+      const { destination, dayIndex, stopIndex, existingStops, preferences, previousStop = null, nextStop = null } = req.body;
       if (!destination || dayIndex === undefined || stopIndex === undefined || !existingStops || !preferences) {
         console.log('[API] Missing required parameters in regen-stop request');
         return res.status(400).json(createApiResponse(false, null, 'INVALID_REQUEST', 'All parameters are required for stop regeneration'));
       }
 
       console.log('[API] Calling aiService.regenStop...');
-      const data = await aiService.regenStop(destination, dayIndex, stopIndex, existingStops, preferences);
+      const data = await aiService.regenStop(destination, dayIndex, stopIndex, existingStops, preferences, { previousStop, nextStop });
       console.log(`[API] Request completed in ${Date.now() - start}ms`);
       return res.json(createApiResponse(true, data, null, 'Stop regenerated successfully'));
     } catch (error) {

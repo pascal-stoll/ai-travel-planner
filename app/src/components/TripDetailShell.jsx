@@ -36,9 +36,9 @@ export function TripDetailShell({
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     try {
-      exportItineraryToPdf(itinerary);
+      await exportItineraryToPdf(itinerary);
       setToast('Your itinerary PDF is downloading.');
     } catch (error) {
       console.error('Failed to export itinerary PDF:', error);
