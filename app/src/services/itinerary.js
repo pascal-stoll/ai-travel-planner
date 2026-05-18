@@ -127,6 +127,8 @@ export function buildStopRegenerationRequest(itinerary, dayIndex, stopIndex) {
       ? {
           name: day.stops[stopIndex - 1].name,
           type: day.stops[stopIndex - 1].category || 'activity',
+          category: day.stops[stopIndex - 1].category || 'activity',
+          arrivalTime: day.stops[stopIndex - 1].arrivalTime || day.stops[stopIndex - 1].time || '',
           duration: Math.max(0.5, Number(((Number(day.stops[stopIndex - 1].durationMinutes) || 60) / 60).toFixed(1))),
           description: day.stops[stopIndex - 1].description,
         }
@@ -135,6 +137,8 @@ export function buildStopRegenerationRequest(itinerary, dayIndex, stopIndex) {
       ? {
           name: day.stops[stopIndex + 1].name,
           type: day.stops[stopIndex + 1].category || 'activity',
+          category: day.stops[stopIndex + 1].category || 'activity',
+          arrivalTime: day.stops[stopIndex + 1].arrivalTime || day.stops[stopIndex + 1].time || '',
           duration: Math.max(0.5, Number(((Number(day.stops[stopIndex + 1].durationMinutes) || 60) / 60).toFixed(1))),
           description: day.stops[stopIndex + 1].description,
         }
@@ -142,6 +146,8 @@ export function buildStopRegenerationRequest(itinerary, dayIndex, stopIndex) {
     existingStops: day.stops.map((item) => ({
       name: item.name,
       type: item.category || 'activity',
+      category: item.category || 'activity',
+      arrivalTime: item.arrivalTime || item.time || '',
       duration: Math.max(0.5, Number(((Number(item.durationMinutes) || 60) / 60).toFixed(1))),
       description: item.description || 'No description available yet.',
     })),

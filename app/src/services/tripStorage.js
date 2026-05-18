@@ -331,3 +331,28 @@ export function saveStoredActiveItinerary(itinerary) {
 
   return writeStorageJson(ACTIVE_ITINERARY_KEY, normalized);
 }
+
+// MT01 — Load saved itineraries from storage
+// ⚠️ ADAPTED: spec iterated raw localStorage keys with prefix 'trip_', but
+//             this repo stores everything under TRIP_HISTORY_KEY via getSavedTrips().
+//             loadAllTrips wraps getSavedTrips() so MyTripsPage works without
+//             touching the storage internals.
+
+/**
+ * Returns all saved itinerary entries, newest first.
+ * Each entry shape: { id, destinationName, thumbnailUrl, travelStyle,
+ *   durationLabel, generatedAt, stopCount, itinerary, ... }
+ * @returns {Array}
+ */
+export function loadAllTrips() {
+  return getSavedTrips();
+}
+
+/**
+ * Deletes a saved itinerary by its id.
+ * @param {string} tripId
+ * @returns {boolean}
+ */
+export function deleteTrip(tripId) {
+  return deleteSavedTrip(tripId);
+}

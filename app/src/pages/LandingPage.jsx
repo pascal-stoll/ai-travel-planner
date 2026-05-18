@@ -4,8 +4,8 @@ import { useTravel } from '../context/useTravel.js';
 import { BottomSheet } from '../components/BottomSheet.jsx';
 import { TripBriefChips } from '../components/TripBriefChips.jsx';
 import { ExtendedWizard } from '../components/ExtendedWizard.jsx';
+import { SurpriseMeButton } from '../components/SurpriseMeButton.jsx';
 import { generateItineraryForExtendedWizard, generateItineraryForWizard } from '../features/results/generateItinerary.js';
-import { buildSurpriseWizardState } from '../services/itinerary.js';
 import { durationOptions, moodOptions, radiusOptions } from '../utils/constants.js';
 
 function LandingPage() {
@@ -208,12 +208,6 @@ function LandingPage() {
         detectLocation();
       }
     }
-  };
-
-  const handleSurprise = () => {
-    const preview = buildSurpriseWizardState(wizardState);
-    updateWizard(preview);
-    runGeneration(preview, generateItineraryForWizard);
   };
 
   const handleMoodSelect = (selectedMoods) => {
@@ -517,15 +511,7 @@ function LandingPage() {
               <span className="text-xl">✦</span>
               {isGenerating ? 'Creating your itinerary...' : 'Generate My Itinerary'}
             </button>
-            <button
-              type="button"
-              onClick={handleSurprise}
-              aria-label="Generate a surprise itinerary"
-              className="inline-flex items-center justify-center gap-3 rounded-full border border-slate-200 bg-white px-8 py-4 text-base font-semibold text-slate-900 shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:border-slate-300 hover:bg-slate-50"
-            >
-              <span className="text-xl">⬡</span>
-              Surprise Me
-            </button>
+            <SurpriseMeButton />
             <button
               type="button"
               onClick={handleOpenExtendedWizard}
